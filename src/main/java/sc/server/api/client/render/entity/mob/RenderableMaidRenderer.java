@@ -11,44 +11,44 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import sc.server.api.entity.mob.MaidMob;
 import sc.server.api.entity.mob.RenderableMaid;
 
 /**
  * Touhou Little Maid模组的实体渲染
  */
-@EventBusSubscriber(value = Dist.CLIENT, bus = Bus.MOD)
-public class MaidRenderer extends EntityRenderer<Mob> {
+public abstract class RenderableMaidRenderer extends EntityRenderer<Entity> {
 	protected final EntityMaidRenderer entityMaidRenderer;
 	protected final IGeoEntityRenderer<Mob> ysmMaidRenderer;
 
 	@SuppressWarnings("unchecked")
-	public MaidRenderer(EntityRendererProvider.Context context) {
+	public RenderableMaidRenderer(EntityRendererProvider.Context context) {
 		super(context);
 		entityMaidRenderer = new EntityMaidRenderer(context);
 		ysmMaidRenderer = (IGeoEntityRenderer<Mob>) unsafe.read_member_reference(entityMaidRenderer, "ysmMaidRenderer");
 	}
 
-	@Override
-	public void render(Mob mob, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+	public final void render(RenderableMaid maid, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
 		// YSM渲染依赖entity.getCapability()，如果获取到的IGeoEntity Capability为empty，则不执行渲染。因此CapabilityProvider必须正确初始化。
-		if (mob instanceof RenderableMaid maid) {
+		if (maid != null)
 			entityMaidRenderer.render(maid.renderingEntity(), entityYaw, partialTicks, poseStack, bufferSource, packedLight);
-		}
+	}
+
+	public abstract RenderableMaid getRenderableMaid(Entity entity);
+
+	@Override
+	public void render(Entity entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+		this.render(this.getRenderableMaid(entity), entityYaw, partialTicks, poseStack, bufferSource, packedLight);
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(Mob mob) {
-		if (mob instanceof RenderableMaid maid)
-			return entityMaidRenderer.getTextureLocation(maid.renderingEntity());
-		else
+	public ResourceLocation getTextureLocation(Entity entity) {
+		RenderableMaid maid = this.getRenderableMaid(entity);
+		if (maid == null)
 			return null;
+		else
+			return entityMaidRenderer.getTextureLocation(maid.renderingEntity());
 	}
 
 	public IGeoEntity getOrCreateYsmGeoEntityCapability(EntityMaid maidEntity) {
@@ -58,10 +58,5 @@ public class MaidRenderer extends EntityRenderer<Mob> {
 		geoEntity.setYsmModel(maidEntity.getYsmModelId(), maidEntity.getYsmModelTexture());
 		geoEntity.updateRoamingVars(maidEntity.roamingVars);
 		return geoEntity;
-	}
-
-	@SubscribeEvent
-	public static void register(EntityRenderersEvent.RegisterRenderers event) {
-		MaidMob.RENDERER_TYPE.register(event);
 	}
 }

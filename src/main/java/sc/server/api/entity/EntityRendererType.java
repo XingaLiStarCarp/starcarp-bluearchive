@@ -1,13 +1,15 @@
 package sc.server.api.entity;
 
-import java.lang.reflect.Constructor;
+import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 
+import jvmsp.symbols;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.registries.RegistryObject;
+import sc.server.ModEntry;
 
 /**
  * 实体渲染器相关信息
@@ -70,10 +72,10 @@ public class EntityRendererType<_RenderAsset> {
 		for (RegistryObject<EntityType<?>> type : entityTypes) {
 			event.registerEntityRenderer((EntityType) type.get(), (EntityRendererProvider.Context context) -> {
 				try {
-					Constructor<?> constructor = rendererClazz.getDeclaredConstructor(EntityRendererProvider.Context.class);
-					constructor.setAccessible(true);
-					return (EntityRenderer) constructor.newInstance(context);
+					MethodHandle constructor = symbols.find_constructor(rendererClazz, EntityRendererProvider.Context.class);
+					return (EntityRenderer) constructor.invoke(context);
 				} catch (Throwable ex) {
+					ModEntry.LOGGER.error("register renderer of type '" + rendererClazz + "' failed", ex);
 					return null;
 				}
 			});

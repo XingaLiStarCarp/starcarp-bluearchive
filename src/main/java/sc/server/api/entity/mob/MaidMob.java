@@ -11,12 +11,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.RegistryObject;
-import sc.server.api.client.render.entity.mob.MaidRenderer;
+import sc.server.api.client.render.entity.mob.MaidMobRenderer;
 import sc.server.api.entity.BaseMob;
 import sc.server.api.entity.EntityData;
 import sc.server.api.entity.EntityDefaultAttributes.Entry;
@@ -26,49 +26,8 @@ import sc.server.api.entity.EntityRendererType;
  * Touhou Little Maid模组的女仆类型实体，需要配合渲染器EntityMaidRenderer使用
  */
 public class MaidMob extends BaseMob implements RenderableMaid {
-	/**
-	 * 女仆模型信息。<br>
-	 * 包含TLM的模型信息和YSM的模型信息。<br>
-	 */
-	public static final class MaidModelInfo {
-		private String tlmModelId;
-		private String ysmModelId;
-		private String ysmModelTexture;
-		private Component ysmModelName;
 
-		public MaidModelInfo(String tlmModelId, String ysmModelId, String ysmModelTexture, Component ysmModelName) {
-			this.tlmModelId = tlmModelId;
-			this.ysmModelId = ysmModelId;
-			this.ysmModelTexture = ysmModelTexture;
-			this.ysmModelName = ysmModelName;
-		}
-
-		public MaidModelInfo(String tlmModelId) {
-			this(tlmModelId, "", "", Component.empty());
-		}
-
-		public MaidModelInfo(String ysmModelId, String ysmModelTexture, Component ysmModelName) {
-			this("", ysmModelId, ysmModelTexture, ysmModelName);
-		}
-
-		public String getTlmModelId() {
-			return tlmModelId;
-		}
-
-		public String getYsmModelId() {
-			return ysmModelId;
-		}
-
-		public String getYsmModelTexture() {
-			return ysmModelTexture;
-		}
-
-		public Component getYsmModelName() {
-			return ysmModelName;
-		}
-	}
-
-	public static final EntityRendererType<MaidModelInfo> RENDERER_TYPE = new EntityRendererType<>(MaidRenderer.class);
+	public static final EntityRendererType<MaidModelInfo> RENDERER_TYPE = new EntityRendererType<>(MaidMobRenderer.class);
 
 	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newType(Class<T> entityClazz, float width, float height, String typeName, MobCategory category, List<Entry> attributes) {
 		return BaseMob.newType(entityClazz, width, height, RENDERER_TYPE, typeName, category, attributes);
@@ -88,14 +47,14 @@ public class MaidMob extends BaseMob implements RenderableMaid {
 	public static final String TAG_YSM_MODEL_TEXTURE = "ysm_model_texture";
 	public static final String TAG_YSM_MODEL_NAME = "ysm_model_name";
 
-	public static final EntityDataAccessor<String> ACC_TLM_MODEL_ID = EntityData.define(MaidMob.class, EntityDataSerializers.STRING, RENDERER_TYPE.defaultRenderAsset().getTlmModelId());
-	public static final EntityDataAccessor<Boolean> ACC_IS_YSM_MODEL = EntityData.define(MaidMob.class, EntityDataSerializers.BOOLEAN, false);
-	public static final EntityDataAccessor<String> ACC_YSM_MODEL_ID = EntityData.define(MaidMob.class, EntityDataSerializers.STRING, RENDERER_TYPE.defaultRenderAsset().getYsmModelId());
-	public static final EntityDataAccessor<String> ACC_YSM_MODEL_TEXTURE = EntityData.define(MaidMob.class, EntityDataSerializers.STRING, RENDERER_TYPE.defaultRenderAsset().getYsmModelTexture());
-	public static final EntityDataAccessor<Component> ACC_YSM_MODEL_NAME = EntityData.define(MaidMob.class, EntityDataSerializers.COMPONENT, RENDERER_TYPE.defaultRenderAsset().getYsmModelName());
+	public static final EntityDataAccessor<String> ACC_TLM_MODEL_ID = EntityData.define(MaidMob.class, EntityDataSerializers.STRING, RENDERER_TYPE.defaultRenderAsset().tlmModelId);
+	public static final EntityDataAccessor<Boolean> ACC_IS_YSM_MODEL = EntityData.define(MaidMob.class, EntityDataSerializers.BOOLEAN, RENDERER_TYPE.defaultRenderAsset().isYsmModel);
+	public static final EntityDataAccessor<String> ACC_YSM_MODEL_ID = EntityData.define(MaidMob.class, EntityDataSerializers.STRING, RENDERER_TYPE.defaultRenderAsset().ysmModelId);
+	public static final EntityDataAccessor<String> ACC_YSM_MODEL_TEXTURE = EntityData.define(MaidMob.class, EntityDataSerializers.STRING, RENDERER_TYPE.defaultRenderAsset().ysmModelTexture);
+	public static final EntityDataAccessor<Component> ACC_YSM_MODEL_NAME = EntityData.define(MaidMob.class, EntityDataSerializers.COMPONENT, RENDERER_TYPE.defaultRenderAsset().ysmModelName);
 	public static final EntityDataAccessor<ChatBubbleDataCollection> ACC_CHAT_BUBBLE = EntityData.define(MaidMob.class, ChatBubbleRegister.INSTANCE, ChatBubbleDataCollection.getEmptyCollection());
 
-	private EntityMaid dummyEntityMaid;
+	private EntityMaid renderingEntity;
 
 	/**
 	 * 虚假女仆实体，不实际存在于游戏中，仅仅用于模型渲染
@@ -104,17 +63,17 @@ public class MaidMob extends BaseMob implements RenderableMaid {
 	 */
 	@Override
 	public final EntityMaid renderingEntity() {
-		return dummyEntityMaid;
+		return renderingEntity;
 	}
 
 	@Override
-	public final Mob bindEntity() {
+	public final Entity bindEntity() {
 		return this;
 	}
 
 	public MaidMob(EntityType<BaseMob> entityType, EntityRendererType<String> renderType, Level level) {
 		super(entityType, renderType, level);
-		dummyEntityMaid = RenderableMaid.blankEntityMaid(this);
+		renderingEntity = RenderableMaid.blankEntityMaid(this);
 	}
 
 	@Override
@@ -138,7 +97,7 @@ public class MaidMob extends BaseMob implements RenderableMaid {
 	@Override
 	public void tick() {
 		super.tick();
-		this.syncModel();
+		this.syncRenderingEntity();
 	}
 
 	@Override

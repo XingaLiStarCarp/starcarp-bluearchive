@@ -33,6 +33,10 @@ public enum LogicalEnd {
 		return this.isClientAvailable;
 	}
 
+	public static final boolean isClient() {
+		return FMLEnvironment.dist == Dist.CLIENT;
+	}
+
 	/**
 	 * 判断当前运行环境
 	 * 

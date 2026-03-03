@@ -521,6 +521,15 @@ public class EntityData {
 		BOTTOM_Mob = unsafe.bottom_offset(Mob.class);
 	}
 
+	public static final void copyData(Entity src, Mob dest) {
+		if (src instanceof Mob mob)
+			EntityData.copyMobData(mob, dest);
+		else if (src instanceof LivingEntity livingEntity)
+			EntityData.copyLivingEntityData(livingEntity, dest);
+		else if (src instanceof Entity entity)
+			EntityData.copyEntityData(entity, dest);
+	}
+
 	/**
 	 * 拷贝Entity.class的成员字段，但entityData保留原本的。
 	 * 
