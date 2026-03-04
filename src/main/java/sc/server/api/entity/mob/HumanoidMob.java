@@ -11,7 +11,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.RegistryObject;
-import sc.server.api.client.render.entity.mob.HumanoidRenderer;
+import sc.server.api.client.render.entity.mob.HumanoidMobRenderer;
 import sc.server.api.entity.BaseMob;
 import sc.server.api.entity.EntityData;
 import sc.server.api.entity.EntityRendererType;
@@ -21,8 +21,8 @@ import sc.server.api.entity.EntityDefaultAttributes.Entry;
  * 原版玩家模型实体
  */
 public class HumanoidMob extends BaseMob {
-	public static final EntityRendererType<ResourceLocation> MALE_RENDERER_TYPE = new EntityRendererType<>(HumanoidRenderer.Male.class);
-	public static final EntityRendererType<ResourceLocation> FEMALE_RENDERER_TYPE = new EntityRendererType<>(HumanoidRenderer.Female.class);
+	public static final EntityRendererType<ResourceLocation> MALE_RENDERER_TYPE = new EntityRendererType<>(HumanoidMobRenderer.Male.class);
+	public static final EntityRendererType<ResourceLocation> FEMALE_RENDERER_TYPE = new EntityRendererType<>(HumanoidMobRenderer.Female.class);
 
 	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newMaleType(Class<T> entityClazz, float width, float height, String typeName, MobCategory category, List<Entry> attributes) {
 		return BaseMob.newType(entityClazz, width, height, MALE_RENDERER_TYPE, typeName, category, attributes);

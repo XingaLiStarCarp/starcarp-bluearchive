@@ -7,7 +7,6 @@ import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.ArrowLayer;
 import net.minecraft.client.renderer.entity.layers.BeeStingerLayer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
@@ -26,8 +25,8 @@ import sc.server.api.entity.mob.HumanoidMob;
 
 @OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(value = Dist.CLIENT, bus = Bus.MOD)
-public class HumanoidRenderer extends HumanoidMobRenderer<HumanoidMob, PlayerModel<HumanoidMob>> {
-	public HumanoidRenderer(EntityRendererProvider.Context context, boolean slim) {
+public class HumanoidMobRenderer extends net.minecraft.client.renderer.entity.HumanoidMobRenderer<HumanoidMob, PlayerModel<HumanoidMob>> {
+	public HumanoidMobRenderer(EntityRendererProvider.Context context, boolean slim) {
 		super(context, new PlayerModel<>(context.bakeLayer(slim ? ModelLayers.PLAYER_SLIM : ModelLayers.PLAYER), slim), 0.5F);
 		// 盔甲层
 		this.addLayer(new HumanoidArmorLayer<>(this,
@@ -54,14 +53,14 @@ public class HumanoidRenderer extends HumanoidMobRenderer<HumanoidMob, PlayerMod
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public static final class Male extends HumanoidRenderer {
+	public static final class Male extends HumanoidMobRenderer {
 		public Male(EntityRendererProvider.Context context) {
 			super(context, false);
 		}
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public static final class Female extends HumanoidRenderer {
+	public static final class Female extends HumanoidMobRenderer {
 		public Female(EntityRendererProvider.Context context) {
 			super(context, true);
 		}

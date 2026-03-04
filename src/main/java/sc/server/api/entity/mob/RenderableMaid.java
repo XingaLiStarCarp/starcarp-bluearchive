@@ -1,7 +1,10 @@
 package sc.server.api.entity.mob;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.function.BiConsumer;
 
 import com.github.tartaricacid.touhoulittlemaid.api.client.render.MaidRenderState;
 import com.github.tartaricacid.touhoulittlemaid.entity.chatbubble.ChatBubbleManager;
@@ -13,8 +16,11 @@ import jvmsp.reflection;
 import jvmsp.unsafe;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import sc.server.api.capability.CapabilityData;
 import sc.server.api.entity.EntityData;
 
@@ -51,6 +57,10 @@ public interface RenderableMaid {
 
 		public MaidModelInfo(String ysmModelId, String ysmModelTexture, Component ysmModelName) {
 			this("", true, ysmModelId, ysmModelTexture, ysmModelName);
+		}
+
+		public MaidModelInfo(MaidModelInfo info) {
+			this(info.tlmModelId, info.isYsmModel, info.ysmModelId, info.ysmModelTexture, info.ysmModelName);
 		}
 
 		public MaidModelInfo() {
@@ -105,6 +115,16 @@ public interface RenderableMaid {
 	 * @return
 	 */
 	public abstract Entity bindEntity();
+
+	/**
+	 * 该渲染模型绑定的实体是否被移除，被移除的实体不能再同步数据。<br>
+	 * 在实体外部执行数据同步前必须判断，如果在实体内部tick()方法内同步数据则无需判断。<br>
+	 * 
+	 * @return
+	 */
+	public default boolean isRemoved() {
+		return bindEntity().isRemoved();
+	}
 
 	String getModelId();
 
@@ -161,20 +181,41 @@ public interface RenderableMaid {
 	}
 
 	public static RenderableMaid bind(Entity bindEntity, MaidModelInfo model) {
-		return new Binder(bindEntity, model);
+		return Binder.bind(bindEntity, model);
 	}
 
+	/**
+	 * 绑定实体到女仆模型并实时同步实体数据
+	 * 
+	 * @param bindEntity
+	 * @return
+	 */
 	public static RenderableMaid bind(Entity bindEntity) {
-		return new Binder(bindEntity, new MaidModelInfo());
+		return Binder.bind(bindEntity);
 	}
 
+	public static RenderableMaid bind(Entity bindEntity, BiConsumer<Entity, RenderableMaid> init) {
+		return Binder.bind(bindEntity, init);
+	}
+
+	/**
+	 * 解除绑定，接触后实体数据不再同步
+	 * 
+	 * @param bindEntity
+	 */
+	public static void unbind(Entity bindEntity) {
+		Binder.unbind(bindEntity);
+	}
+
+	/**
+	 * 绑定实体的女仆模型
+	 */
+	@EventBusSubscriber(value = Dist.CLIENT, bus = Bus.FORGE)
 	static class Binder implements RenderableMaid {
 		private Entity bindEntity;
 		private MaidModelInfo model;
 
 		private EntityMaid renderingEntity;
-
-		private static final ArrayList<RenderableMaid> BIND_ENTITIES = new ArrayList<>();
 
 		@Override
 		public final EntityMaid renderingEntity() {
@@ -186,19 +227,56 @@ public interface RenderableMaid {
 			return bindEntity;
 		}
 
-		Binder(Entity bindEntity, MaidModelInfo model) {
-			this.bindEntity = bindEntity;
-			this.renderingEntity = RenderableMaid.blankEntityMaid(bindEntity);
-			this.model = model;
-			BIND_ENTITIES.add(this);
+		private static final HashMap<Entity, RenderableMaid> BINDERS = new HashMap<>();
+
+		public static final RenderableMaid bind(Entity bindEntity, MaidModelInfo model) {
+			return BINDERS.computeIfAbsent(bindEntity, (newEntity) -> new Binder(newEntity, model));
 		}
 
+		public static final RenderableMaid bind(Entity bindEntity, BiConsumer<Entity, RenderableMaid> init) {
+			return BINDERS.computeIfAbsent(bindEntity, (newEntity) -> new Binder(newEntity, init));
+		}
+
+		public static final RenderableMaid bind(Entity bindEntity) {
+			return bind(bindEntity, (MaidModelInfo) null);
+		}
+
+		public static final void unbind(Entity bindEntity) {
+			BINDERS.remove(bindEntity);
+		}
+
+		private Binder(Entity bindEntity, MaidModelInfo model) {
+			this.bindEntity = bindEntity;
+			this.renderingEntity = RenderableMaid.blankEntityMaid(bindEntity);
+			this.model = model == null ? new MaidModelInfo() : model;// 模型必须非null
+			this.syncRenderingEntity();// 初始化时先同步一次，不能等到下一次tick，否则可能在此期间出现渲染错误
+		}
+
+		private Binder(Entity bindEntity, BiConsumer<Entity, RenderableMaid> init) {
+			this.bindEntity = bindEntity;
+			this.renderingEntity = RenderableMaid.blankEntityMaid(bindEntity);
+			this.model = new MaidModelInfo();
+			init.accept(bindEntity, this);
+			this.syncRenderingEntity();
+		}
+
+		/**
+		 * 每tick自动同步实体数据
+		 * 
+		 * @param event
+		 */
 		@SubscribeEvent
-		public static void onServerTick(TickEvent.ServerTickEvent event) {
+		public static void onClientTick(TickEvent.ClientTickEvent event) {
 			if (event.phase == TickEvent.Phase.END) {
-				// 每tick更新计算完成后同步渲染模型
-				for (RenderableMaid maid : BIND_ENTITIES) {
-					maid.syncRenderingEntity();
+				Iterator<Map.Entry<Entity, RenderableMaid>> iter = BINDERS.entrySet().iterator();
+				while (iter.hasNext()) {
+					Map.Entry<Entity, RenderableMaid> entry = iter.next();
+					RenderableMaid maid = entry.getValue();
+					if (maid.isRemoved()) {
+						iter.remove(); // 绑定的实体被移除时，从tick数据同步列表中移除该项
+					} else {
+						maid.syncRenderingEntity();
+					}
 				}
 			}
 		}

@@ -131,4 +131,12 @@ public class EntityRenderers {
 	public static final EntityRenderer<?> getEntityRenderer(EntityType<?> type) {
 		return entityRenderers.get(type);
 	}
+
+	public static final void setPlayerRenderer(String name, EntityRenderer<? extends Player> renderer) {
+		playerRenderers.put(name, renderer);
+	}
+
+	public static final EntityRenderer<? extends Player> getPlayerRenderer(String name) {
+		return playerRenderers.get(name);
+	}
 }
