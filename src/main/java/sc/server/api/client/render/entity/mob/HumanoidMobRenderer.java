@@ -21,11 +21,17 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import sc.server.api.client.render.entity.EntityRenderers;
 import sc.server.api.entity.mob.HumanoidMob;
 
 @OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(value = Dist.CLIENT, bus = Bus.MOD)
 public class HumanoidMobRenderer extends net.minecraft.client.renderer.entity.HumanoidMobRenderer<HumanoidMob, PlayerModel<HumanoidMob>> {
+	static {
+		HumanoidMob.MALE_RENDERER_TYPE.registerRenderer(HumanoidMobRenderer.Male.class, EntityRendererProvider.Context.class);
+		HumanoidMob.FEMALE_RENDERER_TYPE.registerRenderer(HumanoidMobRenderer.Female.class, EntityRendererProvider.Context.class);
+	}
+
 	public HumanoidMobRenderer(EntityRendererProvider.Context context, boolean slim) {
 		super(context, new PlayerModel<>(context.bakeLayer(slim ? ModelLayers.PLAYER_SLIM : ModelLayers.PLAYER), slim), 0.5F);
 		// 盔甲层
@@ -67,8 +73,8 @@ public class HumanoidMobRenderer extends net.minecraft.client.renderer.entity.Hu
 	}
 
 	@SubscribeEvent
-	public static void register(EntityRenderersEvent.RegisterRenderers event) {
-		HumanoidMob.MALE_RENDERER_TYPE.register(event);
-		HumanoidMob.FEMALE_RENDERER_TYPE.register(event);
+	public static void register(EntityRenderersEvent.AddLayers event) {
+		EntityRenderers.register(HumanoidMob.MALE_RENDERER_TYPE, EntityRenderers.context());
+		EntityRenderers.register(HumanoidMob.FEMALE_RENDERER_TYPE, EntityRenderers.context());
 	}
 }

@@ -1,41 +1,42 @@
 package sc.server.api.entity;
 
-import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 
 import jvmsp.symbols;
-import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.RegistryObject;
-import sc.server.ModEntry;
 
 /**
  * 实体渲染器相关信息
  */
 public class EntityRendererType<_RenderAsset> {
 
-	private final Class<? extends EntityRenderer<?>> rendererClazz;
+	private Class<?> rendererClazz = null;
+	private Class<?>[] rendererClazzCtorTypes = null;
 
 	// 每种实体渲染类型都有哪些EntityType
 	private final ArrayList<RegistryObject<EntityType<?>>> entityTypes;
 
 	// 默认的渲染使用的全部模型、纹理数据
-	private _RenderAsset defaultRenderAsset;
+	private _RenderAsset defaultAsset;
 
-	public EntityRendererType(Class<? extends EntityRenderer<?>> rendererClazz, _RenderAsset defaultRenderAsset) {
-		this.rendererClazz = rendererClazz;
-		this.defaultRenderAsset = defaultRenderAsset;
+	public EntityRendererType(_RenderAsset defaultRenderAsset) {
+		this.defaultAsset = defaultRenderAsset;
 		this.entityTypes = new ArrayList<>();
 	}
 
-	public EntityRendererType(Class<? extends EntityRenderer<?>> rendererClazz) {
-		this(rendererClazz, null);
+	public EntityRendererType() {
+		this(null);
 	}
 
-	public final Class<? extends EntityRenderer<?>> rendererType() {
+	public final Class<?> rendererType() {
 		return rendererClazz;
+	}
+
+	public final Class<?>[] rendererCtorTypes() {
+		return rendererClazzCtorTypes;
 	}
 
 	public String toString() {
@@ -56,30 +57,40 @@ public class EntityRendererType<_RenderAsset> {
 	 * 
 	 * @return
 	 */
-	public final _RenderAsset defaultRenderAsset() {
-		if (defaultRenderAsset == null)
-			throw new java.lang.IllegalStateException("no default render asset defined for '" + this.toString() + "'");
+	public final _RenderAsset defaultAsset() {
+		if (defaultAsset == null)
+			throw new java.lang.IllegalStateException("no default asset defined for '" + this.toString() + "'");
 		else
-			return defaultRenderAsset;
+			return defaultAsset;
 	}
 
 	public final void setDefaultRenderAsset(_RenderAsset ra) {
-		this.defaultRenderAsset = ra;
+		this.defaultAsset = ra;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void register(EntityRenderersEvent.RegisterRenderers event) {
-		for (RegistryObject<EntityType<?>> type : entityTypes) {
-			event.registerEntityRenderer((EntityType) type.get(), (EntityRendererProvider.Context context) -> {
-				try {
-					MethodHandle constructor = symbols.find_constructor(rendererClazz, EntityRendererProvider.Context.class);
-					return (EntityRenderer) constructor.invoke(context);
-				} catch (Throwable ex) {
-					ModEntry.LOGGER.error("register renderer of type '" + rendererClazz + "' failed", ex);
-					return null;
-				}
-			});
-		}
+	/**
+	 * 为EntityRendererType注册对应的渲染器类型。<br>
+	 * 可以在static代码块中调用。<br>
+	 * 仅能在客户端调用，服务端不存在类rendererClazz，如果调用会导致错误。<br>
+	 * 
+	 * @param rendererType
+	 * @param rendererClazz
+	 */
+	@OnlyIn(Dist.CLIENT)
+	public final void registerRenderer(Class<?> rendererClazz, Class<?>... rendererClazzCtorTypes) {
+		this.rendererClazz = rendererClazz;
+		this.rendererClazzCtorTypes = rendererClazzCtorTypes;
+	}
+
+	/**
+	 * 创建一个新的渲染器
+	 * 
+	 * @param args
+	 * @return
+	 */
+	@OnlyIn(Dist.CLIENT)
+	public final Object newRenderer(Object... args) {
+		return symbols.construct(rendererClazz, rendererClazzCtorTypes, args);
 	}
 
 	/**

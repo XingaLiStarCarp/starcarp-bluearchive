@@ -16,10 +16,9 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import sc.server.api.ModPaths;
 import sc.server.api.registry.Registers;
 import sc.server.block.Blocks;
-import sc.server.entity.npc.HumanoidCustomer;
-import sc.server.entity.npc.MaidCustomer;
 
 @Mod(ModEntry.MOD_ID)
 public class ModEntry {
@@ -27,6 +26,7 @@ public class ModEntry {
 	public static final Logger LOGGER = LogUtils.getLogger();
 
 	public ModEntry(FMLJavaModLoadingContext context) {
+		LOGGER.info("Classpath: " + ModPaths.classpath(ModEntry.class));
 		IEventBus modEventBus = context.getModEventBus();
 		// 注册注册表条目
 		Registers.register(modEventBus);
@@ -38,8 +38,8 @@ public class ModEntry {
 
 		context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
-		HumanoidCustomer.init();
-		MaidCustomer.init();
+		ModPaths.load(true, "sc.server.entity", true);
+
 	}
 
 	private void commonSetup(final FMLCommonSetupEvent event) {

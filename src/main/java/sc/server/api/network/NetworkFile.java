@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
 
+import javabase.CheckCode;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +26,6 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.NetworkEvent.Context;
 import net.minecraftforge.network.simple.SimpleChannel;
 import sc.server.ModEntry;
-import sc.server.api.CheckCode;
 
 public class NetworkFile {
 	public static final String PROTOCOL_VERSION = "1.0";

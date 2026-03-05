@@ -1,4 +1,4 @@
-package sc.server.api;
+package javabase;
 
 /**
  * 解决HashMap中多个Key存在Hash冲突的封装对象

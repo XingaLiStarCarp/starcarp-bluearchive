@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableList;
 
 import cpw.mods.modlauncher.api.INameMappingService;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import javabase.HashKey;
 import jvmsp.reflection;
 import jvmsp.symbols;
 import jvmsp.unsafe;
@@ -42,7 +43,6 @@ import net.minecraftforge.common.capabilities.CapabilityProvider;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import sc.server.ModEntry;
-import sc.server.api.HashKey;
 import sc.server.api.capability.CapabilityData;
 
 /**
@@ -521,13 +521,29 @@ public class EntityData {
 		BOTTOM_Mob = unsafe.bottom_offset(Mob.class);
 	}
 
-	public static final void copyData(Entity src, Mob dest) {
-		if (src instanceof Mob mob)
-			EntityData.copyMobData(mob, dest);
-		else if (src instanceof LivingEntity livingEntity)
-			EntityData.copyLivingEntityData(livingEntity, dest);
-		else if (src instanceof Entity entity)
-			EntityData.copyEntityData(entity, dest);
+	/**
+	 * 拷贝从Entity到Mob继承链的实体数据
+	 * 
+	 * @param src
+	 * @param dest
+	 */
+	public static final void copyData(Entity src, Entity dest) {
+		if (src instanceof Mob srcMob) {
+			if (dest instanceof Mob destMob)
+				EntityData.copyMobData(srcMob, destMob);
+			else if (dest instanceof LivingEntity destLivingEntity)
+				EntityData.copyLivingEntityData(srcMob, destLivingEntity);
+			else if (dest instanceof Entity destEntity)
+				EntityData.copyEntityData(srcMob, destEntity);
+		} else if (src instanceof LivingEntity srcLivingEntity) {
+			if (dest instanceof LivingEntity destLivingEntity)
+				EntityData.copyLivingEntityData(srcLivingEntity, destLivingEntity);
+			else if (dest instanceof Entity destEntity)
+				EntityData.copyEntityData(srcLivingEntity, destEntity);
+		} else if (src instanceof Entity srcEntity) {
+			if (dest instanceof Entity destEntity)
+				EntityData.copyEntityData(srcEntity, destEntity);
+		}
 	}
 
 	/**

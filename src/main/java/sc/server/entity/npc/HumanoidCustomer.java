@@ -10,7 +10,6 @@ import sc.server.api.entity.EntityInteractions.CombinedTask;
 import sc.server.api.entity.EntityRendererType;
 import sc.server.api.entity.mob.HumanoidMob;
 import sc.server.api.entity.trait.ConstGoalTrait;
-import sc.server.api.entity.trait.ConstGoalTrait.GoalEntry;
 import sc.server.entity.npc.trait.CustomerTrait;
 
 /**
@@ -34,10 +33,6 @@ public class HumanoidCustomer extends HumanoidMob {
 		super(entityType, rendererType, level);
 		this.addTrait(new CustomerTrait());
 		this.addTrait(new ConstGoalTrait()
-				.add(GoalEntry.of(1, (mob) -> new PanicGoal(mob, 1.25))));
-	}
-
-	public static void init() {
-
+				.add(1, (mob) -> new PanicGoal(mob, 1.25)));
 	}
 }

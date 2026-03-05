@@ -1,8 +1,6 @@
 package sc.server.api.entity.trait;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.function.Function;
 
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -13,7 +11,7 @@ import sc.server.api.entity.BaseMob.TraitComponent;
  * 添加常驻的Goal的特性
  */
 public class ConstGoalTrait implements TraitComponent {
-	public static class GoalEntry {
+	private static class GoalEntry {
 		private int priority;
 		private Goal goal;
 		private Function<BaseMob, Goal> goalCtor;
@@ -30,10 +28,6 @@ public class ConstGoalTrait implements TraitComponent {
 		public Goal goal(BaseMob mob) {
 			return goal == null ? (goal = goalCtor.apply(mob)) : goal;
 		}
-
-		public static final GoalEntry of(int priority, Function<BaseMob, Goal> goalCtor) {
-			return new GoalEntry(priority, goalCtor);
-		}
 	}
 
 	private final ArrayList<GoalEntry> goals;
@@ -42,18 +36,8 @@ public class ConstGoalTrait implements TraitComponent {
 		goals = new ArrayList<GoalEntry>();
 	}
 
-	public ConstGoalTrait add(GoalEntry entry) {
-		goals.add(entry);
-		return this;
-	}
-
-	public ConstGoalTrait add(Collection<GoalEntry> entries) {
-		goals.addAll(entries);
-		return this;
-	}
-
-	public ConstGoalTrait add(GoalEntry... entries) {
-		goals.addAll(List.of(entries));
+	public ConstGoalTrait add(int priority, Function<BaseMob, Goal> goalCtor) {
+		goals.add(new GoalEntry(priority, goalCtor));
 		return this;
 	}
 

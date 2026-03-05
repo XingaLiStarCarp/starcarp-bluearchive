@@ -17,6 +17,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -45,12 +46,12 @@ public abstract class BaseMob extends PathfinderMob {
 	}
 
 	public final Object defaultRenderAsset() {
-		return rendererType.defaultRenderAsset();
+		return rendererType.defaultAsset();
 	}
 
 	@SuppressWarnings("unchecked")
 	public final <_T> _T defaultRenderAsset(Class<_T> clazz) {
-		return (_T) rendererType.defaultRenderAsset();
+		return (_T) rendererType.defaultAsset();
 	}
 
 	public static final float HUMANOID_WIDTH = 0.6f;
@@ -102,7 +103,12 @@ public abstract class BaseMob extends PathfinderMob {
 	public static final List<Entry> PLAYER_ATTRIBUTES = List.of(
 			Entry.of(Attributes.MAX_HEALTH, 20),
 			Entry.of(Attributes.MOVEMENT_SPEED, 0.25), // 与玩家的默认移动速度相同
-			Entry.of(Attributes.FOLLOW_RANGE, 16));
+			Entry.of(Attributes.FOLLOW_RANGE, 16),
+			Entry.of(Attributes.ARMOR, 0),
+			Entry.of(Attributes.ARMOR_TOUGHNESS, 0),
+			Entry.of(Attributes.ATTACK_DAMAGE, 1),
+			Entry.of(Attributes.ATTACK_KNOCKBACK, 0),
+			Entry.of(Attributes.ATTACK_SPEED, 4));
 
 	private boolean pushable;
 	private boolean attackable;
@@ -165,9 +171,8 @@ public abstract class BaseMob extends PathfinderMob {
 	 * @param pushable
 	 * @return
 	 */
-	public BaseMob setPushable(boolean pushable) {
+	public void setPushable(boolean pushable) {
 		this.pushable = pushable;
-		return this;
 	}
 
 	/**
@@ -177,9 +182,8 @@ public abstract class BaseMob extends PathfinderMob {
 	 * @param distance
 	 * @return
 	 */
-	public BaseMob setRemoveDistance(double distance) {
+	public void setRemoveDistance(double distance) {
 		this.rmDistance = distance;
-		return this;
 	}
 
 	@Override
@@ -198,9 +202,8 @@ public abstract class BaseMob extends PathfinderMob {
 	 * @param attackable
 	 * @return
 	 */
-	public BaseMob setAttackable(boolean attackable) {
+	public void setAttackable(boolean attackable) {
 		this.attackable = attackable;
-		return this;
 	}
 
 	/**
@@ -209,9 +212,8 @@ public abstract class BaseMob extends PathfinderMob {
 	 * @param loc
 	 * @return
 	 */
-	public BaseMob face(Vec3 loc) {
+	public void face(Vec3 loc) {
 		this.lookAt(Anchor.EYES, loc);
-		return this;
 	}
 
 	/**
@@ -220,8 +222,8 @@ public abstract class BaseMob extends PathfinderMob {
 	 * @param entity
 	 * @return
 	 */
-	public BaseMob face(Entity entity) {
-		return face(entity.getEyePosition());
+	public void face(Entity entity) {
+		face(entity.getEyePosition());
 	}
 
 	/**
@@ -230,14 +232,28 @@ public abstract class BaseMob extends PathfinderMob {
 	 * @param item
 	 * @return
 	 */
-	public BaseMob setHold(ItemStack item) {
+	public void setMainHandHold(ItemStack item) {
 		this.setItemInHand(InteractionHand.MAIN_HAND, item);
-		return this;
 	}
 
-	public BaseMob chat(String msg) {
-		// this.entity().chat(msg);
-		return this;
+	public void setMainHandHold(Item item) {
+		this.setMainHandHold(new ItemStack(item, 1));
+	}
+
+	public void setMainHandHold(String item) {
+		this.setMainHandHold(Registers.item(item));
+	}
+
+	public void setOffHandHold(ItemStack item) {
+		this.setItemInHand(InteractionHand.OFF_HAND, item);
+	}
+
+	public void setOffHandHold(Item item) {
+		this.setOffHandHold(new ItemStack(item, 1));
+	}
+
+	public void setOffHandHold(String item) {
+		this.setOffHandHold(Registers.item(item));
 	}
 
 	/**
@@ -247,7 +263,7 @@ public abstract class BaseMob extends PathfinderMob {
 	 * @param msg
 	 * @return
 	 */
-	public BaseMob chatTo(Player player, String msg) {
+	public void chat(Player player, String msg) {
 		Component name = this.getCustomName();
 		if (name == null) {
 			// 生物实体如果没有名字则省去名字前缀，直接发送消息
@@ -260,7 +276,6 @@ public abstract class BaseMob extends PathfinderMob {
 			sb.append(msg);
 			player.sendSystemMessage(Component.literal(sb.toString()));
 		}
-		return this;
 	}
 
 	private final ArrayList<TraitComponent> traitComponents = new ArrayList<>();

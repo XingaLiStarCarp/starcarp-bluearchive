@@ -1,4 +1,4 @@
-package sc.server.api;
+package javabase;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

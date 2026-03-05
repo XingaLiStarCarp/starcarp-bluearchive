@@ -1,6 +1,10 @@
 package sc.server.api.entity.goal;
 
+import java.util.function.Predicate;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -20,5 +24,9 @@ public class MobGoalUtils {
 		} else {
 			return level.getBlockState(groundPos).isSolid();
 		}
+	}
+
+	public static Predicate<LivingEntity> entityHolds(Item item) {
+		return (entity) -> entity.getMainHandItem().is(item);
 	}
 }

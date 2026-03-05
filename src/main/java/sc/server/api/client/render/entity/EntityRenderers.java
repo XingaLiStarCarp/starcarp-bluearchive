@@ -27,6 +27,8 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.registries.RegistryObject;
+import sc.server.api.entity.EntityRendererType;
 
 /**
  * 实体渲染器操作
@@ -138,5 +140,15 @@ public class EntityRenderers {
 
 	public static final EntityRenderer<? extends Player> getPlayerRenderer(String name) {
 		return playerRenderers.get(name);
+	}
+
+	public static final void register(EntityRendererType<?> rendererType, Object... args) {
+		for (RegistryObject<EntityType<?>> type : rendererType.entityTypes()) {
+			register(type.get(), rendererType, args);
+		}
+	}
+
+	public static final void register(EntityType<?> type, EntityRendererType<?> rendererType, Object... args) {
+		EntityRenderers.setEntityRenderer(type, (EntityRenderer<?>) rendererType.newRenderer(args));
 	}
 }
