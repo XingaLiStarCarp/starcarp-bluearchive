@@ -1,4 +1,4 @@
-package sc.server.api.entity.maid;
+package sc.server.api.ext.tlm.entity.maid;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -24,6 +24,7 @@ import jvmsp.reflection;
 import jvmsp.unsafe;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -33,7 +34,7 @@ import sc.server.api.ModPaths;
 import sc.server.api.capability.CapabilityData;
 import sc.server.api.entity.EntityData;
 import sc.server.api.entity.SyncedRenderEntity;
-import sc.server.api.entity.maid.SyncedRenderMaid.MaidModelAsset;
+import sc.server.api.ext.tlm.entity.maid.SyncedRenderMaid.MaidModelAsset;
 
 /**
  * 可以作为Touhou Little Maid模组女仆模型渲染的委托接口。<br>
@@ -213,10 +214,10 @@ public interface SyncedRenderMaid extends SyncedRenderEntity<EntityMaid, MaidMod
 	/**
 	 * 创建一个虚假女仆实体，仅用于渲染
 	 * 
-	 * @param templateEntity 数据模板，新的EntityMaid将沿用此实体的数据。
+	 * @param initEntity 数据模板，新的EntityMaid将沿用此实体的数据。
 	 * @return
 	 */
-	public static EntityMaid blankEntityMaid(Entity templateEntity) {
+	public static EntityMaid blankEntityMaid(Entity initEntity) {
 		class Symbols {
 			private static Field EntityMaid_chatBubbleManager;
 			private static Field EntityMaid_taskDataMaps;
@@ -229,7 +230,7 @@ public interface SyncedRenderMaid extends SyncedRenderEntity<EntityMaid, MaidMod
 			}
 		}
 		EntityMaid entity = EntityData.blankEntity(EntityMaid.class);
-		EntityData.copyData(templateEntity, entity);
+		EntityData.copyData(initEntity, entity);
 		unsafe.write(entity, Symbols.EntityMaid_chatBubbleManager, new ChatBubbleManager(entity));
 		unsafe.write(entity, Symbols.EntityMaid_taskDataMaps, new MaidTaskDataMaps());
 		unsafe.write(entity, Symbols.EntityMaid_handItemsForAnimation, new ItemStack[] { ItemStack.EMPTY, ItemStack.EMPTY });// 设置空手持物品，渲染时需要
@@ -289,6 +290,13 @@ public interface SyncedRenderMaid extends SyncedRenderEntity<EntityMaid, MaidMod
 	}
 
 	/**
+	 * 女仆是否正在挥手。<br>
+	 * 
+	 * @return
+	 */
+	public boolean isSwingingArms();
+
+	/**
 	 * 同步EntityMaid虚假实体的模型.<br>
 	 * 同时同步绑定的的实体数据到maid，包括渲染使用到的实体相关数据。<br>
 	 * 该方法必须被子类调用以实时同步渲染模型，每tick调用一次即可。<br>
@@ -296,24 +304,14 @@ public interface SyncedRenderMaid extends SyncedRenderEntity<EntityMaid, MaidMod
 	@Override
 	public default EntityMaid syncRenderingEntity() {
 		EntityMaid renderingEntity = SyncedRenderEntity.super.syncRenderingEntity();
+		// 同步模型
 		renderingEntity.setModelId(this.getTlmModelId());
 		renderingEntity.setIsYsmModel(this.isYsmModel());
 		renderingEntity.setYsmModel(this.getYsmModelId(), this.getYsmModelTexture(), this.getYsmModelName());
+		// 同步挥手
+		// TODO: TLM兼容层参数设置
+		renderingEntity.setSwingingArms(this.isSwingingArms());
 		return renderingEntity;
-	}
-
-	/**
-	 * 设置使得女仆抬起或放下主手。<br>
-	 * 女仆的攻击动画都需要手动设置。<br>
-	 * 
-	 * @param swingingArms
-	 */
-	public default void setSwingingArms(boolean swingingArms) {
-		renderingEntity().setSwingingArms(swingingArms);
-	}
-
-	public default boolean isSwingingArms() {
-		return renderingEntity().isSwingingArms();
 	}
 
 	public default void playRouletteAnim(String rouletteAnim) {
@@ -342,7 +340,7 @@ public interface SyncedRenderMaid extends SyncedRenderEntity<EntityMaid, MaidMod
 	 * 绑定实体的女仆模型
 	 */
 	@EventBusSubscriber(value = Dist.CLIENT, bus = Bus.FORGE)
-	static class Binder extends ModelBinder<EntityMaid, MaidModelAsset> implements SyncedRenderMaid {
+	public static class Binder extends ModelBinder<EntityMaid, MaidModelAsset> implements SyncedRenderMaid {
 
 		public static final SyncedRenderMaid bind(Entity bindEntity, MaidModelAsset model) {
 			return bind(SyncedRenderMaid.Binder::new, bindEntity, model);
@@ -409,6 +407,15 @@ public interface SyncedRenderMaid extends SyncedRenderEntity<EntityMaid, MaidMod
 		@Override
 		public MaidModelAsset modelAsset() {
 			return model;
+		}
+
+		@Override
+		public boolean isSwingingArms() {
+			if (bindEntity instanceof LivingEntity livingEntity) {
+				return livingEntity.swinging;
+			} else {
+				return false;
+			}
 		}
 	}
 }

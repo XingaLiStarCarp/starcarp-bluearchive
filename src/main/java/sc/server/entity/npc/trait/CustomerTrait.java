@@ -12,14 +12,12 @@ public class CustomerTrait extends CombinedInteractionTrait<BaseMob> {
 	public CustomerTrait() {
 		super((event, player, mob, hand) -> {
 			return EntityInteractions.receiveItemFromPlayerMainHandAndHold(player, mob, "minecraft:diamond", 1);
-		},
-				(event, player, mob, hand) -> {
-					return EntityInteractions.receiveItemFromPlayerMainHandAndHold(player, mob, "minecraft:apple", 2);
-				});
+		});
 	}
 
 	@Override
 	public void onSuccess(EntityInteract event, Player player, BaseMob mob, InteractionHand hand) {
 		EntityInteractions.sengMsgToPlayer(player, "success");
+		mob.swing(InteractionHand.MAIN_HAND);
 	}
 }

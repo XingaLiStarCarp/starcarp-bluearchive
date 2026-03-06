@@ -15,6 +15,7 @@ public class UseItemMeleeAttackGoal extends MeleeAttackGoal {
 	private byte startUsingEvent = -1;
 	private byte stopUsingEvent = -1;
 
+	protected int startTicks = 0;
 	protected boolean isUsing;
 	protected InteractionHand hand;
 
@@ -33,6 +34,7 @@ public class UseItemMeleeAttackGoal extends MeleeAttackGoal {
 	public void start() {
 		super.start();
 		this.isUsing = false;
+		startTicks = 1;
 		this.startUsing();
 	}
 
@@ -40,7 +42,12 @@ public class UseItemMeleeAttackGoal extends MeleeAttackGoal {
 	public void stop() {
 		this.stopUsing();
 		this.isUsing = false;
+		startTicks = 0;
 		super.stop();
+	}
+
+	public int getStartTicks() {
+		return startTicks;
 	}
 
 	public UseItemMeleeAttackGoal setStartUsingEvent(byte startUsingEvent) {
@@ -56,6 +63,9 @@ public class UseItemMeleeAttackGoal extends MeleeAttackGoal {
 	@Override
 	public void tick() {
 		super.tick();
+		if (startTicks > 0) {
+			++startTicks;
+		}
 		LivingEntity target = this.mob.getTarget();
 		if (target != null) {
 			double distanceToTarget = this.mob.distanceToSqr(target);

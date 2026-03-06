@@ -1,4 +1,4 @@
-package sc.server.api.client.render.entity.maid;
+package sc.server.api.ext.tlm.client.render.entity.maid;
 
 import com.github.tartaricacid.touhoulittlemaid.client.renderer.entity.EntityMaidRenderer;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
@@ -9,7 +9,7 @@ import jvmsp.unsafe;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.entity.Mob;
 import sc.server.api.client.render.entity.SyncedRenderEntityRenderer;
-import sc.server.api.entity.maid.SyncedRenderMaid;
+import sc.server.api.ext.tlm.entity.maid.SyncedRenderMaid;
 
 /**
  * Touhou Little Maid模组的实体渲染。<br>

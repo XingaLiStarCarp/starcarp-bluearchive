@@ -1,4 +1,4 @@
-package sc.server.api.client.render.entity.maid;
+package sc.server.api.ext.tlm.client.render.entity.maid;
 
 import java.util.function.BiConsumer;
 
@@ -6,8 +6,8 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import sc.server.api.client.render.entity.EntityRenderers;
-import sc.server.api.entity.maid.SyncedRenderMaid;
-import sc.server.api.entity.maid.SyncedRenderMaid.MaidModelAsset;
+import sc.server.api.ext.tlm.entity.maid.SyncedRenderMaid;
+import sc.server.api.ext.tlm.entity.maid.SyncedRenderMaid.MaidModelAsset;
 
 /**
  * 将指定EntityType渲染为指定TLM或YSM模型的渲染器

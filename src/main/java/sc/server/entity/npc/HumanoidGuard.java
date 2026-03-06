@@ -2,15 +2,13 @@ package sc.server.entity.npc;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.RegistryObject;
-import sc.server.api.component.trait.entity.ConstGoalTrait;
+import sc.server.api.component.trait.entity.StepParticlesTrait;
 import sc.server.api.entity.BaseMob;
-import sc.server.api.entity.EntityRendererType;
 import sc.server.api.entity.EntityInteractions.CombinedTask;
+import sc.server.api.entity.EntityRendererType;
 import sc.server.api.entity.mob.HumanoidMob;
-import sc.server.entity.npc.trait.CustomerTrait;
 import sc.server.entity.npc.trait.GuardTrait;
 
 public class HumanoidGuard extends HumanoidMob {
@@ -29,8 +27,7 @@ public class HumanoidGuard extends HumanoidMob {
 	 */
 	public HumanoidGuard(EntityType<BaseMob> entityType, EntityRendererType<ResourceLocation> rendererType, Level level) {
 		super(entityType, rendererType, level);
-		this.addTrait(new CustomerTrait());
-		this.addTrait(new ConstGoalTrait<BaseMob>()
-				.add(1, (mob) -> new PanicGoal(mob, 1.25)));
+		this.addTrait(new StepParticlesTrait<>(2.0));
+		this.addTrait(new GuardTrait("minecraft:iron_sword", 80));
 	}
 }

@@ -1,4 +1,4 @@
-package sc.server.api.client.render.entity.maid;
+package sc.server.api.ext.tlm.client.render.entity.maid;
 
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.entity.Entity;
@@ -8,8 +8,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import sc.server.api.client.render.entity.EntityRenderers;
-import sc.server.api.entity.maid.MaidMob;
-import sc.server.api.entity.maid.SyncedRenderMaid;
+import sc.server.api.ext.tlm.entity.maid.MaidMob;
+import sc.server.api.ext.tlm.entity.maid.SyncedRenderMaid;
 
 /**
  * MaidMob渲染器

@@ -1,8 +1,7 @@
-package sc.server.api.entity.maid;
+package sc.server.api.ext.tlm.entity.maid;
 
 import java.util.List;
 
-import com.github.tartaricacid.touhoulittlemaid.compat.slashblade.SlashBladeCompat;
 import com.github.tartaricacid.touhoulittlemaid.entity.chatbubble.ChatBubbleDataCollection;
 import com.github.tartaricacid.touhoulittlemaid.entity.chatbubble.ChatBubbleRegister;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
@@ -12,7 +11,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -121,12 +119,6 @@ public class MaidMob extends BaseMob implements SyncedRenderMaid {
 	}
 
 	@Override
-	public void swing(InteractionHand hand) {
-		SlashBladeCompat.swingSlashBlade(renderingEntity, getItemInHand(hand));// TLM兼容层参数设置
-		super.swing(hand);
-	}
-
-	@Override
 	public String getTlmModelId() {
 		return entityData.get(ST_TLM_MODEL_ID);
 	}
@@ -184,5 +176,10 @@ public class MaidMob extends BaseMob implements SyncedRenderMaid {
 	@Override
 	public MaidModelAsset modelAsset() {
 		return new MaidModelAsset(this.getTlmModelId(), this.isYsmModel(), this.getYsmModelId(), this.getYsmModelTexture(), this.getYsmModelName());
+	}
+
+	@Override
+	public boolean isSwingingArms() {
+		return this.swinging;
 	}
 }

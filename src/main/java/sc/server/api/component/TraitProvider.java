@@ -14,6 +14,10 @@ public interface TraitProvider<_TraitTarget> {
 		public default void uninit(_TraitTarget target) {
 
 		}
+
+		public default void tick(_TraitTarget target) {
+
+		}
 	}
 
 	public abstract ArrayList<TraitComponent<_TraitTarget>> getTraits();
@@ -28,5 +32,16 @@ public interface TraitProvider<_TraitTarget> {
 	public default void removeTrait(TraitComponent<_TraitTarget> trait) {
 		trait.uninit((_TraitTarget) this);
 		getTraits().remove(trait);
+	}
+
+	/**
+	 * 子类必须每tick调用此方法更新
+	 */
+	@SuppressWarnings("unchecked")
+	public default void tickTraits() {
+		ArrayList<TraitComponent<_TraitTarget>> traits = this.getTraits();
+		for (TraitComponent<_TraitTarget> trait : traits) {
+			trait.tick((_TraitTarget) this);
+		}
 	}
 }

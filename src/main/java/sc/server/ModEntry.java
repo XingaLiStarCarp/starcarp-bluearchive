@@ -17,7 +17,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import sc.server.api.ModPaths;
-import sc.server.api.entity.maid.SyncedRenderMaid.MaidModelAsset;
+import sc.server.api.ext.tlm.entity.maid.SyncedRenderMaid.MaidModelAsset;
 import sc.server.api.registry.Registers;
 import sc.server.block.Blocks;
 

@@ -6,7 +6,10 @@ import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,7 +17,10 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import sc.server.api.TimeUtils;
 import sc.server.api.registry.Registers;
 
 /**
@@ -197,5 +203,66 @@ public class EntityInteractions {
 	public static final void pause(Entity entity) {
 		entity.setDeltaMovement(Vec3.ZERO);// 停止移动
 		entity.setSilent(true);// 停止实体声音
+	}
+
+	/**
+	 * 水平速率平方
+	 * 
+	 * @param entity
+	 * @return
+	 */
+	public static final double horizontalSpeedSqr(Entity entity) {
+		Vec3 dx = entity.getDeltaMovement();
+		double vx = dx.x / TimeUtils.SECOND_PER_TICK;
+		double vz = dx.z / TimeUtils.SECOND_PER_TICK;
+		return vx * vx + vz * vz;
+	}
+
+	public static final boolean horizontalSpeedFasterThan(Entity entity, double speed) {
+		return horizontalSpeedSqr(entity) > speed * speed;
+	}
+
+	/**
+	 * 生成跟随实体的粒子，每tick调用
+	 * 
+	 * @param mob
+	 * @param spwanInterval 生成每个粒子的间隔
+	 * @param yOffset       生成粒子的高度偏移量
+	 * @param clampRange    高斯分布随机数的截断范围
+	 * @param spreadRange   生成粒子的范围
+	 */
+	public static final void spawnFollowParticles(Entity entity, RandomSource random, BlockParticleOption particle, int spwanInterval, double yOffset, double clampRange, double spreadRange, double speedX, double speedY, double speedZ) {
+		if (entity.tickCount % spwanInterval == 0) {
+			Vec3 pos = entity.position();
+			double scaleFactor = spreadRange / clampRange;// 粒子的位移缩放因子
+			entity.level().addParticle(
+					particle,
+					pos.x() + Math.clamp(random.nextGaussian(), -clampRange, clampRange) * scaleFactor, // 高斯分布做截断限制范围，中心概率大边缘概率小
+					pos.y() + yOffset, // Y坐标（实体位置向下偏移，对应脚下）
+					pos.z() + Math.clamp(random.nextGaussian(), -clampRange, clampRange) * scaleFactor,
+					speedX,
+					speedY,
+					speedZ);
+		}
+	}
+
+	public static final void spawnFollowParticles(LivingEntity entity, BlockParticleOption particle, int spwanInterval, double yOffset, double clampRange, double spreadRange, double speedX, double speedY, double speedZ) {
+		spawnFollowParticles(entity, entity.getRandom(), particle, spwanInterval, yOffset, clampRange, spreadRange, speedX, speedY, speedZ);
+	}
+
+	public static final void spawnGroundParticles(LivingEntity entity, int spwanInterval, double yOffset, double clampRange, double spreadRange) {
+		// 判断是否处于地面
+		if (entity.onGround() && !entity.isInWater()) {
+			BlockState groundBlock = entity.level().getBlockState(entity.blockPosition().below());// 获取实体当前脚下的方块
+			if (groundBlock.getBlock() != Blocks.AIR) {
+				spawnFollowParticles(entity, new BlockParticleOption(ParticleTypes.BLOCK, groundBlock), spwanInterval, yOffset, clampRange, spreadRange, 0, 0, 0);
+			}
+		}
+	}
+
+	public static final void spawnRunningGroundParticles(LivingEntity entity, int spwanInterval, double speed) {
+		if (horizontalSpeedFasterThan(entity, speed)) {
+			spawnGroundParticles(entity, spwanInterval, 0.1, 10.0, 1.0);
+		}
 	}
 }

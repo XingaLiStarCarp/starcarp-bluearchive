@@ -107,13 +107,31 @@ public abstract class BaseMob extends PathfinderMob implements TraitProvider<Bas
 			Entry.of(Attributes.ATTACK_KNOCKBACK, 0),
 			Entry.of(Attributes.ATTACK_SPEED, 4));
 
-	private boolean pushable;
-	private boolean attackable;
-	private double rmDistance;
+	private boolean updateSwing = true;
+	private boolean pushable = true;
+	private boolean attackable = true;
+	private double rmDistance = -1;
 
 	public BaseMob(EntityType<BaseMob> entityType, EntityRendererType<?> renderType, Level level) {
 		super(entityType, level);
 		this.rendererType = renderType;
+	}
+
+	public final boolean isClientSide() {
+		return level().isClientSide();
+	}
+
+	@Override
+	public void tick() {
+		this.tickTraits();// 更新特性的执行动作
+		super.tick();
+	}
+
+	@Override
+	public void aiStep() {
+		super.aiStep();
+		if (updateSwing)
+			this.updateSwingTime();// 使用swing()后需要手动更新swing剩余时间
 	}
 
 	/**
@@ -155,6 +173,10 @@ public abstract class BaseMob extends PathfinderMob implements TraitProvider<Bas
 	public final void readAdditionalSaveData(CompoundTag compound) {
 		super.readAdditionalSaveData(compound);
 		this.loadData(compound, super.entityData);
+	}
+
+	public void setUpdateSwing(boolean updateSwing) {
+		this.updateSwing = updateSwing;
 	}
 
 	@Override

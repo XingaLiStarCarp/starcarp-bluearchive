@@ -6,8 +6,8 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import sc.server.api.client.render.entity.maid.MaidModelDispatcher;
-import sc.server.api.entity.maid.SyncedRenderMaid.MaidModelAsset;
+import sc.server.api.ext.tlm.client.render.entity.maid.MaidModelDispatcher;
+import sc.server.api.ext.tlm.entity.maid.SyncedRenderMaid.MaidModelAsset;
 
 @EventBusSubscriber(value = Dist.CLIENT, bus = Bus.MOD)
 public class MaidModelReplacer {

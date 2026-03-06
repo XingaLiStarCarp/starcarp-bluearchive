@@ -23,7 +23,6 @@ public interface DualEndedTrait<_Param> extends TraitComponent<_Param> {
 		return isClient() == level.isClientSide;
 	}
 
-	@SuppressWarnings("resource")
 	public default boolean validate(Entity entity) {
 		return validate(entity.level());
 	}

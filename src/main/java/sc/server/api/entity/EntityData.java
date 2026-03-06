@@ -563,6 +563,7 @@ public class EntityData {
 
 	/**
 	 * 创建一个具有该实体种类默认entityData的空实体。<br>
+	 * 虚假实体不实际存在于游戏，因此它也无法自动更新，无法自动接收处理Packet和SynchedEntityData。
 	 * 
 	 * @param <_T>
 	 * @param entityClazz
@@ -642,4 +643,15 @@ public class EntityData {
 		EntityData.copyLivingEntityData(src, dest);
 		unsafe.copy_member_fields(src, dest, TOP_Mob, BOTTOM_Mob);
 	}
+
+	private static Field PathNavigation_speedModifier;
+
+	static {
+		PathNavigation_speedModifier = reflection.find_declared_field(PathNavigation.class, ObfuscationReflectionHelper.remapName(INameMappingService.Domain.FIELD, "f_26497_"));
+	}
+
+	public static final double getSpeedModifier(PathNavigation navigation) {
+		return (double) unsafe.read_double(navigation, EntityData.PathNavigation_speedModifier);
+	}
+
 }

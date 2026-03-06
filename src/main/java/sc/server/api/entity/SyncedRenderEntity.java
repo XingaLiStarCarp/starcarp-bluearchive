@@ -99,6 +99,11 @@ public interface SyncedRenderEntity<_RenderingEntity extends Entity, _Model> {
 			return bindEntity;
 		}
 
+		@Override
+		public final boolean isRemoved() {
+			return bindEntity.isRemoved();
+		}
+
 		private static final HashMap<Entity, ModelBinder<? extends Entity, ?>> BINDERS = new HashMap<>();
 
 		@SuppressWarnings("unchecked")
