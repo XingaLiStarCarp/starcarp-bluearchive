@@ -1,9 +1,9 @@
 package scba.entity.npc;
 
 import mcbase.component.trait.entity.GoalTrait;
-import mcbase.entity.BaseMob;
 import mcbase.entity.EntityRendererType;
 import mcbase.entity.EntityInteractions.CombinedTask;
+import mcbase.entity.mob.BaseMob;
 import mcbase.entity.mob.HumanoidMob;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;

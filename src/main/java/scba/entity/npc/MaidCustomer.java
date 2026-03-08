@@ -1,8 +1,8 @@
 package scba.entity.npc;
 
 import mcbase.component.trait.entity.GoalTrait;
-import mcbase.entity.BaseMob;
 import mcbase.entity.EntityRendererType;
+import mcbase.entity.mob.BaseMob;
 import mcbase.ext.tlm.entity.maid.MaidMob;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
@@ -18,7 +18,7 @@ public class MaidCustomer extends MaidMob {
 
 	public static final String CUSTOMER_MAID_TYPE_NAME = "npc_maid_customer";
 
-	public static final RegistryObject<EntityType<MaidCustomer>> CUSTOMER_MAID_TYPE = MaidMob.newType(MaidCustomer.class, HUMANOID_WIDTH, HUMANOID_HEIGHT, CUSTOMER_MAID_TYPE_NAME, BaseMob.PLAYER_ATTRIBUTES);
+	public static final RegistryObject<EntityType<MaidCustomer>> CUSTOMER_MAID_TYPE = MaidMob.newType(MaidCustomer.class, MIAD_WIDTH, MAID_HEIGHT, CUSTOMER_MAID_TYPE_NAME, BaseMob.PLAYER_ATTRIBUTES);
 
 	public MaidCustomer(EntityType<BaseMob> entityType, EntityRendererType<MaidModelAsset> rendererType, Level level) {
 		super(entityType, rendererType, level);

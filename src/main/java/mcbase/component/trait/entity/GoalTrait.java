@@ -64,8 +64,8 @@ public class GoalTrait<_GoalHolder extends Mob> implements TraitComponent<_GoalH
 
 	@Override
 	public void uninit(_GoalHolder mob) {
-		for (GoalEntry<_GoalHolder> entry : goalEntries) {
-			mob.goalSelector.removeGoal(entry.goal(mob));
+		for (Goal goal : goals) {
+			mob.goalSelector.removeGoal(goal);
 		}
 		goals.clear();
 	}

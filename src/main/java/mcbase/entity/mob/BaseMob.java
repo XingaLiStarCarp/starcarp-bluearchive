@@ -1,4 +1,4 @@
-package mcbase.entity;
+package mcbase.entity.mob;
 
 import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
@@ -8,6 +8,10 @@ import java.util.List;
 import jvmsp.symbols;
 import mcbase.component.OpProvider;
 import mcbase.component.TraitProvider;
+import mcbase.entity.EntityData;
+import mcbase.entity.EntityDefaultAttributes;
+import mcbase.entity.EntityInteractions;
+import mcbase.entity.EntityRendererType;
 import mcbase.entity.EntityDefaultAttributes.Entry;
 import mcbase.registry.Registers;
 import net.minecraft.commands.arguments.EntityAnchorArgument.Anchor;
@@ -28,6 +32,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.registries.RegistryObject;
 import scba.ModEntry;
 
@@ -52,9 +57,6 @@ public abstract class BaseMob extends PathfinderMob implements TraitProvider<Bas
 	public final <_T> _T defaultRenderAsset(Class<_T> clazz) {
 		return (_T) rendererType.defaultAsset();
 	}
-
-	public static final float HUMANOID_WIDTH = 0.6f;
-	public static final float HUMANOID_HEIGHT = 1.8f;
 
 	/**
 	 * 注册一种新的生物实体类型。<br>
@@ -109,7 +111,7 @@ public abstract class BaseMob extends PathfinderMob implements TraitProvider<Bas
 			Entry.of(Attributes.ATTACK_KNOCKBACK, 0),
 			Entry.of(Attributes.ATTACK_SPEED, 4));
 
-	private boolean updateSwing = false;
+	private boolean updateSwing = true;
 	private boolean pushable = true;
 	private boolean attackable = true;
 	private double rmDistance = -1;

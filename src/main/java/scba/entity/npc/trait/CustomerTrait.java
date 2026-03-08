@@ -1,8 +1,8 @@
 package scba.entity.npc.trait;
 
 import mcbase.component.trait.entity.CombinedInteractionTrait;
-import mcbase.entity.BaseMob;
 import mcbase.entity.EntityInteractions;
+import mcbase.entity.mob.BaseMob;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;

@@ -7,10 +7,10 @@ import com.github.tartaricacid.touhoulittlemaid.entity.chatbubble.ChatBubbleData
 import com.github.tartaricacid.touhoulittlemaid.entity.chatbubble.ChatBubbleRegister;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 
-import mcbase.entity.BaseMob;
 import mcbase.entity.EntityData;
-import mcbase.entity.EntityRendererType;
 import mcbase.entity.EntityDefaultAttributes.Entry;
+import mcbase.entity.EntityRendererType;
+import mcbase.entity.mob.BaseMob;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -41,6 +41,9 @@ public class MaidMob extends BaseMob implements SyncedRenderMaid {
 	static {
 		RENDERER_TYPE.setDefaultRenderAsset(new MaidModelAsset());
 	}
+
+	public static final float MIAD_WIDTH = 0.6f;
+	public static final float MAID_HEIGHT = 1.8f;
 
 	public static final String TAG_TLM_MODEL_ID = "tlm_model_id";
 	public static final String TAG_IS_YSM_MODEL = "is_ysm_model";
@@ -112,7 +115,6 @@ public class MaidMob extends BaseMob implements SyncedRenderMaid {
 	public void tick() {
 		super.tick();
 		this.syncRenderingEntity();
-
 	}
 
 	@Override

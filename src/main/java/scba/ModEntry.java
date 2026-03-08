@@ -23,7 +23,7 @@ import scba.block.Blocks;
 
 @Mod(ModEntry.MOD_ID)
 public class ModEntry {
-	public static final String MOD_ID = "sc";
+	public static final String MOD_ID = "scba";
 	public static final Logger LOGGER = LogUtils.getLogger();
 
 	public ModEntry(FMLJavaModLoadingContext context) {
@@ -41,7 +41,7 @@ public class ModEntry {
 
 		context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
-		ModPaths.load(true, "sc.server.entity", true);
+		ModPaths.load(true, "scba.entity", true);
 
 	}
 

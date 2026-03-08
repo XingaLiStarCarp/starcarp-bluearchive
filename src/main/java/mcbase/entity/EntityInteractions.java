@@ -26,6 +26,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ToolActions;
 
 /**
  * 交互相关动作。
@@ -298,14 +299,5 @@ public class EntityInteractions {
 		if (horizontalSpeedFasterThan(entity, speed)) {
 			spawnGroundParticles(entity, spwanInterval, 0.1, 10.0, 1.0);
 		}
-	}
-
-	public static final void startUsingItem(LivingEntity entity, InteractionHand hand) {
-		entity.swing(hand);
-		entity.startUsingItem(hand);
-	}
-
-	public static final void stopUsingItem(LivingEntity entity, InteractionHand hand) {
-		entity.stopUsingItem();
 	}
 }

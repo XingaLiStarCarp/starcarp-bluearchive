@@ -3,15 +3,13 @@ package scba.entity.npc.trait;
 import java.util.List;
 
 import mcbase.component.trait.entity.GoalTrait;
-import mcbase.entity.BaseMob;
 import mcbase.entity.EntityDefaultAttributes.Entry;
 import mcbase.entity.goal.MeleeAttackGoal;
-import mcbase.entity.goal.MobGoalUtils;
 import mcbase.entity.goal.NearestTargetGoal;
 import mcbase.entity.goal.SprintKeepDistanceToTargetGoal;
 import mcbase.entity.goal.UseItemGoal;
+import mcbase.entity.mob.BaseMob;
 import mcbase.registry.Registers;
-import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
@@ -32,21 +30,17 @@ public class GuardTrait extends GoalTrait<BaseMob> {
 	protected String mainHandItem;
 	protected String offhandItem;
 
-	public GuardTrait(String mainHandItem, String offhandItem, MobCategory attackCategory, int speedUpTicks) {
+	public GuardTrait(String mainHandItem, String offhandItem, int speedUpTicks) {
 		super();
-		this.add(0, (mob) -> new MeleeAttackGoal(mob, 2));
-		this.add(1, (mob) -> new UseItemGoal(mob, 2));
+		this.add(0, (mob) -> new MeleeAttackGoal(mob, 1.5));
+		this.add(1, (mob) -> new UseItemGoal(mob, 2, true));// 盾牌被攻击打断时立即重新开盾
 		this.add(2, (mob) -> new SprintKeepDistanceToTargetGoal(mob, 0.5, 0.5, 3.0, 80));
-		this.add(3, (mob) -> new NearestTargetGoal(mob, true, true, MobGoalUtils.entityCategory(attackCategory)));
+		this.add(3, (mob) -> new NearestTargetGoal(mob, true, true, (e) -> true));
 		this.add(4, (mob) -> new WaterAvoidingRandomStrollGoal((PathfinderMob) mob, 1.0D));
 		this.add(5, (mob) -> new RandomLookAroundGoal(mob));
 
 		this.mainHandItem = mainHandItem;
 		this.offhandItem = offhandItem;
-	}
-
-	public GuardTrait(String mainHandItem, String offhandItem, int speedUpTicks) {
-		this(mainHandItem, offhandItem, MobCategory.MONSTER, speedUpTicks);
 	}
 
 	public GuardTrait(String mainHandItem, int speedUpTicks) {

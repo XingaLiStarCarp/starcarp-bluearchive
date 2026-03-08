@@ -2,7 +2,6 @@ package mcbase.entity.mob;
 
 import java.util.List;
 
-import mcbase.entity.BaseMob;
 import mcbase.entity.EntityData;
 import mcbase.entity.EntityRendererType;
 import mcbase.entity.EntityDefaultAttributes.Entry;
@@ -40,9 +39,12 @@ public class HumanoidMob extends BaseMob {
 	}
 
 	static {
-		MALE_RENDERER_TYPE.setDefaultRenderAsset(ResourceLocation.parse("sc:textures/entity/npc/male/ss.png"));
-		FEMALE_RENDERER_TYPE.setDefaultRenderAsset(ResourceLocation.parse("sc:textures/entity/npc/female/ba/misono_mika.png"));
+		MALE_RENDERER_TYPE.setDefaultRenderAsset(ResourceLocation.parse("minecraft:textures/entity/player/wide/steve.png"));
+		FEMALE_RENDERER_TYPE.setDefaultRenderAsset(ResourceLocation.parse("minecraft:textures/entity/player/slim/alex.png"));
 	}
+
+	public static final float HUMANOID_WIDTH = 0.6f;
+	public static final float HUMANOID_HEIGHT = 1.8f;
 
 	public static final String TAG_SKIN = "skin";
 
