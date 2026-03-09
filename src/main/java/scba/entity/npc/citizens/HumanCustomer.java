@@ -4,7 +4,6 @@ import mcbase.component.trait.entity.GoalTrait;
 import mcbase.entity.EntityInteractions.CombinedTask;
 import mcbase.entity.EntityRendererType;
 import mcbase.entity.mob.BaseMob;
-import mcbase.entity.mob.HumanoidMob;
 import mcbase.extended.entity.GeneralHumanoidMob;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
@@ -21,7 +20,7 @@ import scba.entity.npc.citizens.trait.CustomerTrait;
 public class HumanCustomer extends GeneralHumanoidMob {
 	public static final String TYPE_NAME = "npc_human_customer";
 
-	public static final RegistryObject<EntityType<HumanCustomer>> TYPE = HumanoidMob.newType(HumanCustomer.class, HUMANOID_WIDTH, HUMANOID_HEIGHT, TYPE_NAME, BaseMob.PLAYER_ATTRIBUTES);
+	public static final RegistryObject<EntityType<HumanCustomer>> TYPE = newType(HumanCustomer.class, HUMANOID_WIDTH, HUMANOID_HEIGHT, TYPE_NAME, BaseMob.PLAYER_ATTRIBUTES);
 
 	protected CombinedTask consumeItems;
 

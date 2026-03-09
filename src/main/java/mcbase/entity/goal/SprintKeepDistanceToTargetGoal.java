@@ -10,15 +10,15 @@ public class SprintKeepDistanceToTargetGoal extends KeepDistanceToTargetGoal {
 	private int speedUpTicks;
 	private double speedUpAcc;
 
-	public SprintKeepDistanceToTargetGoal(Mob mob, double keepDistance, double tolerance, double finalSpeedModifier, int speedUpTicks, boolean interrupt, int updateTicks) {
-		super(mob, keepDistance, tolerance, 1.0, interrupt, updateTicks);
+	public SprintKeepDistanceToTargetGoal(Mob mob, double keepDistanceMin, double keepDistanceMax, double finalSpeedModifier, int speedUpTicks, boolean interrupt, int updateTicks) {
+		super(mob, keepDistanceMin, keepDistanceMax, 1.0, interrupt, updateTicks);
 		this.finalSpeedModifier = finalSpeedModifier;
 		this.speedUpTicks = speedUpTicks;
 		this.speedUpAcc = finalSpeedModifier / speedUpTicks;
 	}
 
-	public SprintKeepDistanceToTargetGoal(Mob mob, double keepDistance, double tolerance, double finalSpeedModifier, int speedUpTicks) {
-		this(mob, keepDistance, tolerance, finalSpeedModifier, speedUpTicks, true, DEFAULT_UPDATE_TICKS);
+	public SprintKeepDistanceToTargetGoal(Mob mob, double keepDistanceMin, double keepDistanceMax, double finalSpeedModifier, int speedUpTicks) {
+		this(mob, keepDistanceMin, keepDistanceMax, finalSpeedModifier, speedUpTicks, true, DEFAULT_UPDATE_TICKS);
 	}
 
 	public int getSpeedUpTicks() {

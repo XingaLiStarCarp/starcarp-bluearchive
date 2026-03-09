@@ -10,35 +10,35 @@ public abstract class KeepDistanceGoal extends NavigationGoal {
 	protected double speedModifier;
 
 	/**
-	 * 要保持的目标距离
+	 * 要保持的目标距离最小值
 	 */
-	private double keepDistance;
+	private double keepDistanceMin;
 
 	/**
-	 * 允许的距离误差值，在keepDistance ± toleranceRange范围内实体不移动
+	 * 要保持的目标距离最大值
 	 */
-	private double tolerance;
+	private double keepDistanceMax;
 
 	private double minDistanceSqr;
 	private double maxDistanceSqr;
 
-	public KeepDistanceGoal(Mob mob, double keepDistance, double tolerance, double speedModifier, boolean interrupt, int updateTicks) {
+	public KeepDistanceGoal(Mob mob, double keepDistanceMin, double keepDistanceMax, double speedModifier, boolean interrupt, int updateTicks) {
 		super(mob, interrupt, updateTicks);
 		this.speedModifier = speedModifier;
-		this.keepDistance = keepDistance;
-		this.tolerance = tolerance;
+		this.keepDistanceMin = keepDistanceMin;
+		this.keepDistanceMax = keepDistanceMax;
 	}
 
-	public KeepDistanceGoal(Mob mob, double keepDistance, double tolerance) {
-		this(mob, keepDistance, tolerance, 1.0, true, DEFAULT_UPDATE_TICKS);// 原速移动
+	public KeepDistanceGoal(Mob mob, double keepDistanceMin, double keepDistanceMax) {
+		this(mob, keepDistanceMin, keepDistanceMax, 1.0, true, DEFAULT_UPDATE_TICKS);// 原速移动
 	}
 
-	public double getKeepDistance() {
-		return keepDistance;
+	public double getKeepDistanceMin() {
+		return keepDistanceMin;
 	}
 
-	public double getTolerance() {
-		return tolerance;
+	public double getKeepDistanceMax() {
+		return keepDistanceMax;
 	}
 
 	public double getMinDistanceSqr() {
@@ -49,20 +49,11 @@ public abstract class KeepDistanceGoal extends NavigationGoal {
 		return maxDistanceSqr;
 	}
 
-	public void setKeepDistance(double keepDistance) {
-		this.keepDistance = keepDistance;
-		double minDistance = keepDistance - this.tolerance;
-		double maxDistance = keepDistance + this.tolerance;
-		this.minDistanceSqr = minDistance * minDistance;
-		this.maxDistanceSqr = maxDistance * maxDistance;
-	}
-
-	public void setTolerance(double tolerance) {
-		this.tolerance = tolerance;
-		double minDistance = this.keepDistance - tolerance;
-		double maxDistance = this.keepDistance + tolerance;
-		this.minDistanceSqr = minDistance * minDistance;
-		this.maxDistanceSqr = maxDistance * maxDistance;
+	public void setKeepDistanceMin(double keepDistanceMin, double keepDistanceMax) {
+		this.keepDistanceMin = keepDistanceMin;
+		this.keepDistanceMax = keepDistanceMax;
+		this.minDistanceSqr = keepDistanceMin * keepDistanceMin;
+		this.maxDistanceSqr = keepDistanceMax * keepDistanceMax;
 	}
 
 	/**
@@ -78,10 +69,19 @@ public abstract class KeepDistanceGoal extends NavigationGoal {
 		return isInRange(this.targetPos);// 仅当距离不符合时继续
 	}
 
+	protected double targetDistance(Vec3 targetPos, Vec3 direction, double distance) {
+		if (distance < keepDistanceMin)
+			return keepDistanceMin;
+		else if (distance > keepDistanceMax)
+			return keepDistanceMax;
+		else
+			return distance;
+	}
+
 	@Override
-	protected void updateMovement(Vec3 targetPos, Vec3 direction) {
+	protected void updateMovement(Vec3 targetPos, Vec3 direction, double distance) {
 		// 距离过远，实体要靠近。距离过近，实体要远离
-		Vec3 moveToPos = targetPos.add(direction.scale(this.keepDistance));
+		Vec3 moveToPos = targetPos.add(direction.scale(this.targetDistance(targetPos, direction, distance)));
 		this.navigation.moveTo(moveToPos.x, moveToPos.y, moveToPos.z, this.speedModifier);
 	}
 }

@@ -101,7 +101,8 @@ public abstract class NavigationGoal extends BaseGoal {
 				if (this.isNavigationComplete()) {
 					this.navigation.stop();// 满足到达终点的条件，结束导航
 				} else {
-					updateMovement(targetPos, this.mob.position().subtract(targetPos).normalize());
+					Vec3 dx = this.mob.position().subtract(targetPos);
+					updateMovement(targetPos, dx.normalize(), dx.length());
 				}
 			}
 		} else {
@@ -148,6 +149,7 @@ public abstract class NavigationGoal extends BaseGoal {
 	 * 
 	 * @param targetPos 目标点坐标
 	 * @param direction 当前mob朝向目标点的方向
+	 * @param distance  当前距离目标点的直线距离
 	 */
-	protected abstract void updateMovement(Vec3 targetPos, Vec3 direction);
+	protected abstract void updateMovement(Vec3 targetPos, Vec3 direction, double distance);
 }

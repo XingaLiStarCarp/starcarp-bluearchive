@@ -7,12 +7,12 @@ import net.minecraft.world.entity.Mob;
  */
 public class KeepDistanceToTargetGoal extends KeepDistanceGoal {
 
-	public KeepDistanceToTargetGoal(Mob mob, double keepDistance, double tolerance, double speedModifier, boolean interrupt, int updateTicks) {
-		super(mob, keepDistance, tolerance, speedModifier, interrupt, updateTicks);
+	public KeepDistanceToTargetGoal(Mob mob, double keepDistanceMin, double keepDistanceMax, double speedModifier, boolean interrupt, int updateTicks) {
+		super(mob, keepDistanceMin, keepDistanceMax, speedModifier, interrupt, updateTicks);
 	}
 
-	public KeepDistanceToTargetGoal(Mob mob, double keepDistance, double tolerance) {
-		super(mob, keepDistance, tolerance);
+	public KeepDistanceToTargetGoal(Mob mob, double keepDistanceMin, double keepDistanceMax) {
+		super(mob, keepDistanceMin, keepDistanceMax);
 	}
 
 	@Override

@@ -10,7 +10,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 
-public abstract class AttackGoal extends InDistanceGoal {
+public abstract class AttackGoal extends DistanceBoundGoal {
 	protected int attackInterval;
 	protected AttributeInstance attackSpeedAttribute;
 	/**
@@ -18,40 +18,47 @@ public abstract class AttackGoal extends InDistanceGoal {
 	 */
 	protected boolean mustFace = true;
 	protected float faceToleranceAngle = 60.0f;
+	/**
+	 * 左右旋转速度
+	 */
 	protected float yMaxRotSpeed = 30.0f;
+	/**
+	 * 俯仰角上下最大偏离角度
+	 */
 	protected float xMaxRotAngle = 30.0f;
 
 	public static final int ENTITY_ATTRIBUTE_ATTACK_INTERVAL = -1;
 
-	public AttackGoal(Mob mob, double distance, int attackInterval) {
-		super(mob, distance);
+	public AttackGoal(Mob mob, int attackInterval) {
+		super(mob);
 		this.attackInterval = attackInterval;
 		this.attackSpeedAttribute = mob.getAttribute(Attributes.ATTACK_SPEED);
 		this.setFlags(EnumSet.of(Goal.Flag.LOOK));
 	}
 
-	public AttackGoal(Mob mob, double distance) {
-		this(mob, distance, ENTITY_ATTRIBUTE_ATTACK_INTERVAL);
+	public AttackGoal(Mob mob) {
+		this(mob, ENTITY_ATTRIBUTE_ATTACK_INTERVAL);
 	}
 
 	@Override
-	public void update() {
+	public void update(double currentDistance, int currentBoundLevel) {
+		System.err.println("AttackGoal currentDistance,   currentBoundLevel  " + currentDistance + "      " + currentBoundLevel);
 		LivingEntity target = mob.getTarget();
 		this.mob.getLookControl().setLookAt(target, yMaxRotSpeed, xMaxRotAngle);// 攻击时朝向目标
 		// 判断是否面对目标
 		if (!mustFace || (mustFace && EntityInteractions.isEntityFacing(this.mob, target.getEyePosition(), faceToleranceAngle))) {
 			if (this.attackInterval > 0) {
 				// 手动设置了attackInterval
-				this.attack();
+				this.attack(currentDistance, currentBoundLevel);
 			} else {
 				// 使用实体的的attack speed
 				int attributeAttackInterval = (int) (TimeUtils.TICKS_PER_SECOND / attackSpeedAttribute.getBaseValue());
 				if (this.getTicks() % attributeAttackInterval == 0) {
-					this.attack();
+					this.attack(currentDistance, currentBoundLevel);
 				}
 			}
 		}
 	}
 
-	public abstract void attack();
+	public abstract void attack(double currentDistance, int currentBoundLevel);
 }

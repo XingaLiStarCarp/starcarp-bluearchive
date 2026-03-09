@@ -14,6 +14,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import scba.ModEntry;
 
 public class TaczGunOperator {
 	/**
@@ -97,6 +98,13 @@ public class TaczGunOperator {
 	}
 
 	/**
+	 * 使用枪械近战攻击
+	 */
+	public final void melee() {
+		this.gunOperator.melee();
+	}
+
+	/**
 	 * 获取手中的枪
 	 * 
 	 * @return
@@ -125,7 +133,12 @@ public class TaczGunOperator {
 			double z = target.z - this.entity.getZ();
 			float yaw = (float) -Math.toDegrees(Math.atan2(x, z));
 			float pitch = (float) -Math.toDegrees(Math.atan2(y, Math.sqrt(x * x + z * z)));
-			return gunOperator.shoot(() -> pitch, () -> yaw);
+			try {
+				return gunOperator.shoot(() -> pitch, () -> yaw);// 防止自定义枪包抛错
+			} catch (Throwable ex) {
+				ModEntry.LOGGER.error(this.entity + " gun attack failed", ex);
+				return ShootResult.UNKNOWN_FAIL;
+			}
 		}
 	}
 

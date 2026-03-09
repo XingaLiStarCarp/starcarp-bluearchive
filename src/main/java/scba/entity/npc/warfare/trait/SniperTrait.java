@@ -30,7 +30,7 @@ public class SniperTrait extends GoalTrait<BaseMob> {
 
 	public SniperTrait(String taczGun, int speedUpTicks) {
 		super();
-		this.add(0, (mob) -> new GunAttackGoal(mob, 32));
+		this.add(0, (mob) -> new GunAttackGoal(mob).setBoundDistances(2, 64));
 		this.add(1, (mob) -> new SprintKeepDistanceToTargetGoal(mob, 32, 8, 1.2, speedUpTicks));
 		this.add(2, (mob) -> new NearestTargetGoal(mob, true, false, (m, e) -> true));
 		this.add(3, (mob) -> new WaterAvoidingRandomStrollGoal((PathfinderMob) mob, 1.0D));

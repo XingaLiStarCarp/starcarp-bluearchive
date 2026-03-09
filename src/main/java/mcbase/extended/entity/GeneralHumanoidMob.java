@@ -2,7 +2,6 @@ package mcbase.extended.entity;
 
 import java.util.List;
 
-import com.github.tartaricacid.touhoulittlemaid.datagen.tag.TagEntity;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 
 import mcbase.entity.EntityRendererType;
@@ -156,11 +155,7 @@ public class GeneralHumanoidMob extends BaseMob implements HumanoidEntity, Synce
 		super.rideTick();
 		switch (this.getRenderType()) {
 		case GeneralHumanoidModelInfo.TYPE_MAID: {
-			Entity vehicle = this.getVehicle();
-			if (vehicle != null && !vehicle.getType().is(TagEntity.MAID_VEHICLE_ROTATE_BLOCKLIST)) {
-				this.setYHeadRot(vehicle.getYRot());
-				this.setYBodyRot(vehicle.getYRot());
-			}
+			this.tickMaidRide();
 			break;
 		}
 		}

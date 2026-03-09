@@ -3,7 +3,7 @@ package mcbase.entity.goal;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Mob;
 
-public class UseItemGoal extends InDistanceGoal {
+public class UseItemGoal extends DistanceBoundGoal {
 
 	protected InteractionHand hand;
 
@@ -21,24 +21,24 @@ public class UseItemGoal extends InDistanceGoal {
 	public static final int INFINITE_USE_TIME = -1;
 	public static final int NO_USE_INTERVAL = 0;
 
-	public UseItemGoal(Mob mob, double distance, InteractionHand hand, int useTime, int useInterval, boolean interruptReuse) {
-		super(mob, distance);
+	public UseItemGoal(Mob mob, InteractionHand hand, int useTime, int useInterval, boolean interruptReuse) {
+		super(mob);
 		this.hand = hand;
 		this.useTime = useTime;
 		this.useInterval = useInterval;
 		this.interruptReuse = interruptReuse;
 	}
 
-	public UseItemGoal(Mob mob, double distance, InteractionHand hand, boolean interruptReuse) {
-		this(mob, distance, hand, INFINITE_USE_TIME, NO_USE_INTERVAL, interruptReuse);
+	public UseItemGoal(Mob mob, InteractionHand hand, boolean interruptReuse) {
+		this(mob, hand, INFINITE_USE_TIME, NO_USE_INTERVAL, interruptReuse);
 	}
 
-	public UseItemGoal(Mob mob, double distance, int useTime, int useInterval, boolean interruptReuse) {
-		this(mob, distance, InteractionHand.OFF_HAND, useTime, useInterval, interruptReuse);
+	public UseItemGoal(Mob mob, int useTime, int useInterval, boolean interruptReuse) {
+		this(mob, InteractionHand.OFF_HAND, useTime, useInterval, interruptReuse);
 	}
 
-	public UseItemGoal(Mob mob, double distance, boolean interruptReuse) {
-		this(mob, distance, INFINITE_USE_TIME, NO_USE_INTERVAL, interruptReuse);
+	public UseItemGoal(Mob mob, boolean interruptReuse) {
+		this(mob, INFINITE_USE_TIME, NO_USE_INTERVAL, interruptReuse);
 	}
 
 	public void startUsingItem(boolean force) {

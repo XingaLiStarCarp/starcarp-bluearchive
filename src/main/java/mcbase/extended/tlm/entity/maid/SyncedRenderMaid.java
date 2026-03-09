@@ -233,7 +233,7 @@ public interface SyncedRenderMaid extends SyncedRenderEntity<EntityMaid, MaidMod
 					}
 				});
 			} catch (IOException ex) {
-				ModEntry.LOGGER.warn("retrieve local custom ysm model ids failed", ex);
+				ModEntry.LOGGER.warn("retrieve local custom ysm model ids failed");
 			}
 			return LOCAL_CUSTOM_YSM_MODEL_IDS;
 		}
