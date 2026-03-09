@@ -8,6 +8,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import mcbase.entity.data.EntityData;
+import mcbase.entity.data.SynchedEntityDataOp;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
@@ -40,15 +42,22 @@ public interface SyncedRenderEntity<_RenderingEntity extends Entity, _Model> {
 	 * 
 	 * @return
 	 */
-	public default boolean isRemoved() {
+	public default boolean isEntityRemoved() {
 		return bindEntity().isRemoved();
 	}
 
 	/**
-	 * 同步绑定的的实体数据到maid，包括渲染使用到的实体相关数据。<br>
+	 * 同步绑定的的实体数据到renderingEntity，包括渲染使用到的实体相关数据。<br>
 	 * 该方法必须被子类调用以实时同步渲染模型，每tick调用一次即可。<br>
 	 */
-	public default _RenderingEntity syncRenderingEntity() {
+	public default void syncRenderingEntity() {
+		// 仅客户端同步
+		if (bindEntity().level().isClientSide()) {
+			this.syncRenderingEntityData();
+		}
+	}
+
+	public default _RenderingEntity syncRenderingEntityData() {
 		Entity bindEntity = bindEntity();
 		_RenderingEntity renderingEntity = renderingEntity();
 		EntityData.copyData(bindEntity, renderingEntity);// 同步内存字段值
@@ -102,7 +111,7 @@ public interface SyncedRenderEntity<_RenderingEntity extends Entity, _Model> {
 		}
 
 		@Override
-		public final boolean isRemoved() {
+		public final boolean isEntityRemoved() {
 			return bindEntity.isRemoved();
 		}
 
@@ -159,7 +168,7 @@ public interface SyncedRenderEntity<_RenderingEntity extends Entity, _Model> {
 				while (iter.hasNext()) {
 					Entry<Entity, ModelBinder<? extends Entity, ?>> entry = iter.next();
 					ModelBinder<? extends Entity, ?> dummy = entry.getValue();
-					if (dummy.isRemoved()) {
+					if (dummy.isEntityRemoved()) {
 						iter.remove(); // 绑定的实体被移除时，从tick数据同步列表中移除该项
 					} else {
 						dummy.syncRenderingEntity();

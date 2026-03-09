@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
 
 import mcbase.ModPaths;
-import mcbase.ext.tlm.entity.maid.SyncedRenderMaid.MaidModelAsset;
+import mcbase.extended.tlm.entity.maid.SyncedRenderMaid.MaidModelAsset;
 import mcbase.registry.Registers;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;

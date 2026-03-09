@@ -2,12 +2,11 @@ package mcbase.entity.mob;
 
 import java.util.List;
 
-import mcbase.entity.EntityDefaultAttributes.Entry;
 import mcbase.entity.EntityRendererType;
-import mcbase.entity.SynchedEntityDataOp;
+import mcbase.entity.Humanoid.HumanoidEntity;
+import mcbase.entity.data.EntityDefaultAttributes.Entry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -18,87 +17,64 @@ import net.minecraftforge.registries.RegistryObject;
 /**
  * 原版玩家模型实体
  */
-public class HumanoidMob extends BaseMob {
-	public static final EntityRendererType<ResourceLocation> MALE_RENDERER_TYPE = new EntityRendererType<>();
-	public static final EntityRendererType<ResourceLocation> FEMALE_RENDERER_TYPE = new EntityRendererType<>();
+public class HumanoidMob extends BaseMob implements HumanoidEntity {
 
-	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newMaleType(Class<T> entityClazz, float width, float height, String typeName, MobCategory category, List<Entry> attributes) {
-		return BaseMob.newType(entityClazz, width, height, MALE_RENDERER_TYPE, typeName, category, attributes);
+	public static final EntityRendererType<PlayerModelAsset> RENDERER_TYPE = new EntityRendererType<>();
+
+	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newType(Class<T> entityClazz, float width, float height, String typeName, MobCategory category, List<Entry> attributes) {
+		return BaseMob.newType(entityClazz, width, height, RENDERER_TYPE, typeName, category, attributes);
 	}
 
-	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newMaleType(Class<T> entityClazz, float width, float height, String typeName, List<Entry> attributes) {
-		return newMaleType(entityClazz, width, height, typeName, MobCategory.MISC, attributes);
-	}
-
-	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newFemaleType(Class<T> entityClazz, float width, float height, String typeName, MobCategory category, List<Entry> attributes) {
-		return BaseMob.newType(entityClazz, width, height, FEMALE_RENDERER_TYPE, typeName, category, attributes);
-	}
-
-	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newFemaleType(Class<T> entityClazz, float width, float height, String typeName, List<Entry> attributes) {
-		return newFemaleType(entityClazz, width, height, typeName, MobCategory.MISC, attributes);
+	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newType(Class<T> entityClazz, float width, float height, String typeName, List<Entry> attributes) {
+		return newType(entityClazz, width, height, typeName, MobCategory.MISC, attributes);
 	}
 
 	static {
-		MALE_RENDERER_TYPE.setDefaultRenderAsset(ResourceLocation.parse("minecraft:textures/entity/player/wide/steve.png"));
-		FEMALE_RENDERER_TYPE.setDefaultRenderAsset(ResourceLocation.parse("minecraft:textures/entity/player/slim/alex.png"));
+		RENDERER_TYPE.setDefaultRenderAsset(PlayerModelAsset.DEFAULT);
 	}
 
-	public static final float HUMANOID_WIDTH = 0.6f;
-	public static final float HUMANOID_HEIGHT = 1.8f;
+	private static final EntityDataAccessor<?>[] ACCS = HumanoidEntity.defineAllHumanoidEntityData(HumanoidMob.class);
 
-	public static final String TAG_SKIN = "skin";
-
-	public static final EntityDataAccessor<String> ACC_SKIN = SynchedEntityDataOp.define(HumanoidMob.class, EntityDataSerializers.STRING, "");
+	@Override
+	@SuppressWarnings("rawtypes")
+	public EntityDataAccessor[] humanoidEntityDataAccs() {
+		return ACCS;
+	}
 
 	public HumanoidMob(EntityType<BaseMob> entityType, EntityRendererType<ResourceLocation> renderType, Level level) {
 		super(entityType, renderType, level);
 	}
 
-	public HumanoidMob(EntityType<BaseMob> entityType, EntityRendererType<ResourceLocation> renderType, ResourceLocation skin, Level level) {
-		super(entityType, renderType, level);
-		this.setSkin(skin);
-	}
-
-	private ResourceLocation skin;
+	private ResourceLocation skin = RENDERER_TYPE.defaultAsset().getSkin();
 
 	/**
 	 * 获取皮肤
 	 * 
 	 * @return
 	 */
+	@Override
 	public final ResourceLocation getSkin() {
-		if (skin == null) {
-			String storedSkin = entityData.get(ACC_SKIN);
-			if (SynchedEntityDataOp.validate(storedSkin)) {
-				skin = ResourceLocation.parse(storedSkin);// 缓存
-			} else {
-				setSkin(this.defaultRenderAsset(ResourceLocation.class));
-			}
-		}
 		return skin;
 	}
 
-	/**
-	 * 设置皮肤
-	 * 
-	 * @param skin
-	 */
-	public final void setSkin(ResourceLocation skin) {
-		this.skin = skin;
-		entityData.set(ACC_SKIN, skin.toString());
+	@Override
+	public void updateSkin(String skinId) {
+		this.skin = ResourceLocation.parse(skinId);
 	}
 
-	public final void setSkin(String skin) {
-		setSkin(ResourceLocation.parse(skin));
+	@Override
+	public void onSyncedDataUpdated(EntityDataAccessor<?> acc) {
+		super.onSyncedDataUpdated(acc);
+		this.onHumanoidEntitySyncedDataUpdated(acc);
 	}
 
 	@Override
 	protected void storeData(CompoundTag compound, SynchedEntityData entityData) {
-		compound.putString(TAG_SKIN, getSkin().toString());
+		this.storeAllHumanoidEntityData(compound, entityData);
 	}
 
 	@Override
 	protected void loadData(CompoundTag compound, SynchedEntityData entityData) {
-		SynchedEntityDataOp.loadString(compound, TAG_SKIN, entityData, ACC_SKIN);
+		this.loadAllHumanoidEntityData(compound, entityData);
 	}
 }

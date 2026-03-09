@@ -1,7 +1,7 @@
 package mcbase.entity.goal;
 
 import java.util.EnumSet;
-import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -21,7 +21,6 @@ public class NearestTargetGoal extends TargetGoal {
 	protected int randomInterval;
 	protected LivingEntity target;
 	protected TargetingConditions targetConditions;
-	protected Predicate<LivingEntity> attackCondition;
 
 	/**
 	 * 攻击行为
@@ -33,20 +32,17 @@ public class NearestTargetGoal extends TargetGoal {
 	 * @param targetCondition 筛选攻击目标
 	 * @param attackCondition 攻击执行的条件
 	 */
-	public NearestTargetGoal(Mob mob, int randomInterval, boolean musetSee, boolean mustReach, Predicate<LivingEntity> targetCondition, Predicate<LivingEntity> attackCondition) {
+	public NearestTargetGoal(Mob mob, int randomInterval, boolean musetSee, boolean mustReach, BiPredicate<Mob, LivingEntity> targetCondition) {
 		super(mob, musetSee, mustReach);
 		this.randomInterval = reducedTickDelay(randomInterval);
-		this.targetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(targetCondition);
-		this.attackCondition = attackCondition;
+		this.targetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector((entity) -> {
+			return targetCondition.test(this.mob, entity);
+		});
 		this.setFlags(EnumSet.of(Goal.Flag.TARGET));
 	}
 
-	public NearestTargetGoal(Mob mob, boolean mustSee, boolean mustReach, Predicate<LivingEntity> targetCondition, Predicate<LivingEntity> attackCondition) {
-		this(mob, DEFAULT_RANDOM_INTERVAL, mustSee, mustReach, targetCondition, attackCondition);
-	}
-
-	public NearestTargetGoal(Mob mob, boolean mustSee, boolean mustReach, Predicate<LivingEntity> targetCondition) {
-		this(mob, mustSee, mustReach, targetCondition, (Predicate<LivingEntity>) null);
+	public NearestTargetGoal(Mob mob, boolean mustSee, boolean mustReach, BiPredicate<Mob, LivingEntity> targetCondition) {
+		this(mob, DEFAULT_RANDOM_INTERVAL, mustSee, mustReach, targetCondition);
 	}
 
 	/**
@@ -66,7 +62,7 @@ public class NearestTargetGoal extends TargetGoal {
 
 	protected LivingEntity findTarget() {
 		return this.mob.level().getNearestEntity(this.mob.level().getEntitiesOfClass(LivingEntity.class, this.getTargetSearchArea(this.getFollowDistance()), (entity) -> {
-			return true;
+			return entity != this.mob;
 		}), this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
 	}
 
@@ -75,14 +71,14 @@ public class NearestTargetGoal extends TargetGoal {
 		if (this.randomInterval > 0 && this.mob.getRandom().nextInt(this.randomInterval) != 0) {
 			return false;
 		} else {
-			return (this.target = this.findTarget()) != null && (this.attackCondition == null ? true : this.attackCondition.test(this.mob));
+			return (this.target = this.findTarget()) != null;
 		}
 	}
 
 	@Override
 	public void start() {
-		this.mob.setTarget(this.target);
 		super.start();
+		this.mob.setTarget(this.target);
 	}
 
 	public NearestTargetGoal setTarget(LivingEntity target) {

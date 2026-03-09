@@ -2,7 +2,7 @@ package mcbase.entity.goal;
 
 import java.util.EnumSet;
 
-import mcbase.entity.EntityData;
+import mcbase.entity.data.EntityData;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;

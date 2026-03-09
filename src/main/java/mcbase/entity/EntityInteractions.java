@@ -299,4 +299,60 @@ public class EntityInteractions {
 			spawnGroundParticles(entity, spwanInterval, 0.1, 10.0, 1.0);
 		}
 	}
+
+	public static final float DEFAULT_TOLERANCE = 0.95F;
+
+	/**
+	 * Yaw角转方向向量
+	 * 
+	 * @param yaw 使用角度而非弧度
+	 * @return 归一化后的水平方向
+	 */
+	public static final Vec3 horizontalDirection(float yaw) {
+		float radYaw = (float) Math.toRadians(yaw);
+		return new Vec3(-(float) Math.sin(radYaw), 0, (float) Math.cos(radYaw));// 长度为1
+	}
+
+	/**
+	 * 检测头部是否朝向目标方向
+	 * 
+	 * @param entity
+	 * @param direction      方向
+	 * @param partialTick
+	 * @param toleranceAngle 允许的检测范围，使用单位为角度
+	 * @return
+	 */
+	private static boolean isHeadFacing(LivingEntity entity, Vec3 direction, float partialTick, float toleranceAngle) {
+		return entity.getViewVector(partialTick).dot(direction.normalize()) >= Math.cos(Math.toRadians(toleranceAngle));
+	}
+
+	/**
+	 * 检测身体是否朝向目标方向，仅判断水平方向。<br>
+	 * 
+	 * @param entity
+	 * @param pos
+	 * @param tolerance
+	 * @return
+	 */
+	private static boolean isBodyFacingHorizontal(LivingEntity entity, Vec3 pos, float toleranceAngle) {
+		return horizontalDirection(entity.yBodyRot).dot(new Vec3(pos.x(), 0, pos.z()).normalize()) >= Math.cos(Math.toRadians(toleranceAngle));
+	}
+
+	/**
+	 * 判断实体朝向
+	 * 
+	 * @param entity
+	 * @param pos
+	 * @param partialTick
+	 * @param toleranceAngle
+	 * @return
+	 */
+	public static boolean isEntityFacing(LivingEntity entity, Vec3 pos, float partialTick, float toleranceAngle) {
+		Vec3 direction = pos.subtract(entity.position());
+		return isHeadFacing(entity, direction, partialTick, toleranceAngle) && isBodyFacingHorizontal(entity, direction, toleranceAngle);
+	}
+
+	public static boolean isEntityFacing(LivingEntity entity, Vec3 targetPos, float toleranceAngle) {
+		return isEntityFacing(entity, targetPos, 1.0f, toleranceAngle);
+	}
 }
