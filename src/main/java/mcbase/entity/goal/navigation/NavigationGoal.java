@@ -1,8 +1,9 @@
-package mcbase.entity.goal;
+package mcbase.entity.goal.navigation;
 
 import java.util.EnumSet;
 
 import mcbase.entity.data.EntityData;
+import mcbase.entity.goal.BaseGoal;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -31,10 +32,10 @@ public abstract class NavigationGoal extends BaseGoal {
 	protected Vec3 targetPos;
 
 	/**
-	 * 上次tick的目标点引用，用于判断是否目标点有更换。<br>
-	 * 同一个实体的位置都是固定的引用。<br>
+	 * targetPos是否有更新，只有此值被标志为true才会导致targetPosTotalTicks计数重置。
+	 * 如果仅仅是targetPos引用改变，将不影响。
 	 */
-	private Vec3 prevTargetPos = null;
+	protected boolean targetDirty;
 
 	/**
 	 * 从更改targetPos目标引用直到现在的总tick次数。<br>
@@ -80,9 +81,9 @@ public abstract class NavigationGoal extends BaseGoal {
 	 * 判断目标点引用是否有更新
 	 */
 	protected void checkTargetUpdate() {
-		if (prevTargetPos != targetPos) {
+		if (targetDirty) {
 			targetPosTotalTicks = 0;
-			prevTargetPos = targetPos;
+			targetDirty = false;
 		} else if (targetPos != null) {
 			++targetPosTotalTicks;// 如果是同一个目标位置引用，则更新计数
 		}
@@ -96,7 +97,7 @@ public abstract class NavigationGoal extends BaseGoal {
 	public void update() {
 		this.checkTargetUpdate();
 		// 执行路径规划
-		if (this.checkMobTarget()) {
+		if (this.checkTarget()) {
 			if (this.mob.tickCount % updateTicks == 0) {
 				if (this.isNavigationComplete()) {
 					this.navigation.stop();// 满足到达终点的条件，结束导航
@@ -140,6 +141,21 @@ public abstract class NavigationGoal extends BaseGoal {
 
 	public final Vec3 retrieveTargetPos() {
 		return retrieveTargetPos(this.mob);
+	}
+
+	/**
+	 * 精准移动到指定点。<br>
+	 * createPath()最后的int参数为目标位置误差判定，默认为1，会导致在运动距离小于1时实体停止不动认为已经完成了寻路。<br>
+	 * 因此，需要手动创建一个误差为0的Path防止实体因为移动距离太短卡在原地不动。<br>
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param speedModifier
+	 * @return
+	 */
+	public final boolean moveTo(double x, double y, double z, double speedModifier) {
+		return this.navigation.moveTo(this.navigation.createPath(x, y, z, 0), speedModifier);
 	}
 
 	protected abstract boolean isNavigationComplete();

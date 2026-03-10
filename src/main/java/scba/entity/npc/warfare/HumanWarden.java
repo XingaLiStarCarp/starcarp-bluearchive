@@ -1,6 +1,5 @@
 package scba.entity.npc.warfare;
 
-import mcbase.component.trait.entity.StepParticlesTrait;
 import mcbase.entity.EntityRendererType;
 import mcbase.entity.mob.BaseMob;
 import mcbase.extended.entity.GeneralHumanoidMob;
@@ -19,7 +18,6 @@ public class HumanWarden extends GeneralHumanoidMob {
 
 	public HumanWarden(EntityType<BaseMob> entityType, EntityRendererType<GeneralHumanoidModelInfo> rendererType, Level level) {
 		super(entityType, rendererType, level);
-		this.addTrait(new StepParticlesTrait<>(2.0));
-		this.addTrait(new WardenTrait("minecraft:iron_sword", 80));
+		this.addTrait(new WardenTrait(80));
 	}
 }

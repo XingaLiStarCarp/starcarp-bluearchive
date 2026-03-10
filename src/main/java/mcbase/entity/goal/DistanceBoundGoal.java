@@ -48,11 +48,21 @@ public abstract class DistanceBoundGoal extends BaseGoal {
 
 	@Override
 	public boolean canUse() {
-		return this.checkMobTarget() && (currentBoundLevel = this.getDistanceSqrBoundLevel(
-				(currentDistanceSqr = this.distanceSqrToTarget()))) < boundDistancesSqr.length;// 更新当前currentBoundLevel值并检查
+		if (this.checkMobTarget()) {
+			this.updateDistance();
+			return currentBoundLevel < boundDistancesSqr.length;// 更新当前currentBoundLevel值并检查
+		} else {
+			return false;
+		}
+	}
+
+	protected void updateDistance() {
+		currentDistanceSqr = this.distanceSqrToTarget();
+		currentBoundLevel = this.getDistanceSqrBoundLevel(currentDistanceSqr);
 	}
 
 	public void update() {
+		this.updateDistance();
 		this.update(Math.sqrt(currentDistanceSqr), currentBoundLevel);
 	}
 

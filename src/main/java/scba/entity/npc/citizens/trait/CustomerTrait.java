@@ -1,29 +1,30 @@
 package scba.entity.npc.citizens.trait;
 
-import mcbase.component.trait.entity.CombinedInteractionTrait;
-import mcbase.entity.EntityInteractions;
+import java.util.function.Supplier;
+
+import mcbase.component.trait.MultiTrait;
+import mcbase.component.trait.entity.ItemConsumeTrait;
 import mcbase.entity.mob.BaseMob;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 
-public class CustomerTrait extends CombinedInteractionTrait<BaseMob> {
-	@SuppressWarnings("unchecked")
+public class CustomerTrait extends MultiTrait {
+	public static final Supplier<AttributeSupplier> ATTRIBUTES = () -> Mob.createMobAttributes().build();
+
 	public CustomerTrait() {
-		super((event, player, mob, hand) -> {
-			return EntityInteractions.receiveItemFromPlayerMainHandAndHold(player, mob, "minecraft:diamond", 1);
+		super();
+
+		this.add(new ItemConsumeTrait<BaseMob>() {
+
+			@Override
+			public void onSuccess(PlayerInteractEvent.EntityInteract event, Player player, BaseMob mob, InteractionHand hand) {
+				mob.chat(player, "success");
+			}
+
 		});
 	}
 
-	@Override
-	public void onSuccess(EntityInteract event, Player player, BaseMob mob, InteractionHand hand) {
-		EntityInteractions.sengMsgToPlayer(player, "success");
-		// mob.swing(InteractionHand.MAIN_HAND);
-		if (mob.isUsingItem())
-			mob.stopUsingItem();
-		else {
-			mob.swing(InteractionHand.OFF_HAND);
-			mob.startUsingItem(InteractionHand.OFF_HAND);
-		}
-	}
 }

@@ -3,7 +3,8 @@ package mcbase.entity.mob;
 import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import jvmsp.symbols;
 import mcbase.component.OpProvider;
@@ -12,7 +13,6 @@ import mcbase.entity.EntityInteractions;
 import mcbase.entity.EntityRendererType;
 import mcbase.entity.data.EntityDefaultAttributes;
 import mcbase.entity.data.SynchedEntityDataOp;
-import mcbase.entity.data.EntityDefaultAttributes.Entry;
 import mcbase.registry.Registers;
 import net.minecraft.commands.arguments.EntityAnchorArgument.Anchor;
 import net.minecraft.nbt.CompoundTag;
@@ -26,7 +26,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -35,7 +35,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.RegistryObject;
 import scba.ModEntry;
 
-public abstract class BaseMob extends PathfinderMob implements TraitProvider<BaseMob>, OpProvider<BaseMob> {
+public abstract class BaseMob extends PathfinderMob implements TraitProvider, OpProvider {
 
 	private final EntityRendererType<?> rendererType;
 
@@ -70,7 +70,7 @@ public abstract class BaseMob extends PathfinderMob implements TraitProvider<Bas
 	 * @return
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newType(Class<T> entityClazz, float width, float height, EntityRendererType<?> rendererType, String typeName, MobCategory category, List<Entry> attributes) {
+	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newType(Class<T> entityClazz, float width, float height, EntityRendererType<?> rendererType, String typeName, MobCategory category, Function<EntityType<?>, AttributeSupplier> attributes) {
 		RegistryObject<EntityType<BaseMob>> type = Registers.ENTITIES_REG.register(typeName,
 				() -> EntityType.Builder.of((EntityType<BaseMob> entityType, Level level) -> {
 					try {
@@ -88,27 +88,17 @@ public abstract class BaseMob extends PathfinderMob implements TraitProvider<Bas
 		return (RegistryObject<EntityType<T>>) (RegistryObject) type;
 	}
 
-	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newType(Class<T> entityClazz, float width, float height, EntityRendererType<?> renderType, String typeName, MobCategory category, Entry... attributes) {
-		return newType(entityClazz, width, height, renderType, typeName, category, List.of(attributes));
+	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newType(Class<T> entityClazz, float width, float height, EntityRendererType<?> rendererType, String typeName, Function<EntityType<?>, AttributeSupplier> attributes) {
+		return newType(entityClazz, width, height, rendererType, typeName, MobCategory.MISC, attributes);
 	}
 
-	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newType(Class<T> entityClazz, float width, float height, EntityRendererType<?> renderType, String typeName, List<Entry> attributes) {
-		return newType(entityClazz, width, height, renderType, typeName, MobCategory.MISC, attributes);
+	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newType(Class<T> entityClazz, float width, float height, EntityRendererType<?> rendererType, String typeName, MobCategory category, Supplier<AttributeSupplier> attributes) {
+		return newType(entityClazz, width, height, rendererType, typeName, category, (t) -> attributes.get());
 	}
 
-	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newType(Class<T> entityClazz, float width, float height, EntityRendererType<?> renderType, String typeName, Entry... attributes) {
-		return newType(entityClazz, width, height, renderType, typeName, MobCategory.MISC, attributes);
+	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newType(Class<T> entityClazz, float width, float height, EntityRendererType<?> rendererType, String typeName, Supplier<AttributeSupplier> attributes) {
+		return newType(entityClazz, width, height, rendererType, typeName, MobCategory.MISC, attributes);
 	}
-
-	public static final List<Entry> PLAYER_ATTRIBUTES = List.of(
-			Entry.of(Attributes.MAX_HEALTH, 20),
-			Entry.of(Attributes.MOVEMENT_SPEED, 0.25), // 与玩家的默认移动速度相同
-			Entry.of(Attributes.FOLLOW_RANGE, 16),
-			Entry.of(Attributes.ARMOR, 0),
-			Entry.of(Attributes.ARMOR_TOUGHNESS, 0),
-			Entry.of(Attributes.ATTACK_DAMAGE, 1),
-			Entry.of(Attributes.ATTACK_KNOCKBACK, 0),
-			Entry.of(Attributes.ATTACK_SPEED, 4));
 
 	private boolean updateSwing = true;
 	private boolean pushable = true;
@@ -324,17 +314,17 @@ public abstract class BaseMob extends PathfinderMob implements TraitProvider<Bas
 		}
 	}
 
-	private final ArrayList<TraitComponent<BaseMob>> traitComponents = new ArrayList<>();
+	private final ArrayList<TraitComponent<?>> traitComponents = new ArrayList<>();
 
 	@Override
-	public final ArrayList<TraitComponent<BaseMob>> getTraits() {
+	public final ArrayList<TraitComponent<?>> getTraits() {
 		return traitComponents;
 	}
 
-	private final HashMap<Class<?>, OpComponent<BaseMob, ?>> opComponents = new HashMap<>();
+	private final HashMap<Class<?>, OpComponent<?, ?>> opComponents = new HashMap<>();
 
 	@Override
-	public final HashMap<Class<?>, OpComponent<BaseMob, ?>> getOpComponents() {
+	public final HashMap<Class<?>, OpComponent<?, ?>> getOpComponents() {
 		return opComponents;
 	}
 

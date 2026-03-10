@@ -103,6 +103,10 @@ public class EntityInteractions {
 		return receiveItemFromPlayerMainHand(player, Registers.item(type), count);
 	}
 
+	public static boolean receiveItemFromPlayerMainHand(Player player, ItemStack recvItem) {
+		return receiveItemFromPlayerMainHand(player, recvItem.getItem(), recvItem.getCount());
+	}
+
 	/**
 	 * 查找玩家背包的物品
 	 * 
@@ -202,6 +206,10 @@ public class EntityInteractions {
 
 	public static boolean receiveItemFromPlayerMainHandAndHold(Player player, LivingEntity entity, String type, int count) {
 		return receiveItemFromPlayerMainHandAndHold(player, entity, Registers.item(type), count);
+	}
+
+	public static boolean receiveItemFromPlayerMainHandAndHold(Player player, LivingEntity entity, ItemStack recvItem) {
+		return receiveItemFromPlayerMainHandAndHold(player, entity, recvItem.getItem(), recvItem.getCount());
 	}
 
 	public static final void pause(Entity entity) {

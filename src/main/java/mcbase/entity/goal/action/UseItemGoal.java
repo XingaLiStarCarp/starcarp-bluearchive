@@ -1,5 +1,6 @@
-package mcbase.entity.goal;
+package mcbase.entity.goal.action;
 
+import mcbase.entity.goal.DistanceBoundGoal;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Mob;
 

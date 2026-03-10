@@ -1,47 +1,40 @@
 package scba.entity.npc.warfare.trait;
 
-import java.util.List;
+import java.util.function.Supplier;
 
+import mcbase.component.trait.MultiTrait;
 import mcbase.component.trait.entity.GoalTrait;
-import mcbase.entity.data.EntityDefaultAttributes.Entry;
-import mcbase.entity.goal.NearestTargetGoal;
-import mcbase.entity.goal.SprintKeepDistanceToTargetGoal;
-import mcbase.entity.mob.BaseMob;
-import mcbase.extended.tacz.TaczGuns;
+import mcbase.component.trait.entity.ItemHoldTrait;
+import mcbase.component.trait.entity.RandomWanderingTrait;
+import mcbase.entity.goal.action.UseItemGoal;
+import mcbase.entity.goal.navigation.KeepDistanceToTargetGoal;
+import mcbase.entity.goal.target.NearestTargetGoal;
 import mcbase.extended.tacz.goal.GunAttackGoal;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 
-public class SniperTrait extends GoalTrait<BaseMob> {
-	public static final List<Entry> ATTRIBUTES = List.of(
-			Entry.of(Attributes.MAX_HEALTH, 20),
-			Entry.of(Attributes.MOVEMENT_SPEED, 0.2),
-			Entry.of(Attributes.FOLLOW_RANGE, 64),
-			Entry.of(Attributes.ARMOR, 20),
-			Entry.of(Attributes.ARMOR_TOUGHNESS, 8),
-			Entry.of(Attributes.KNOCKBACK_RESISTANCE, 0.8),
-			Entry.of(Attributes.ATTACK_DAMAGE, 10),
-			Entry.of(Attributes.ATTACK_KNOCKBACK, 1),
-			Entry.of(Attributes.ATTACK_SPEED, 1.5));
+public class SniperTrait extends MultiTrait {
+	public static final Supplier<AttributeSupplier> ATTRIBUTES = () -> Mob.createMobAttributes()
+			.add(Attributes.MAX_HEALTH, 20)
+			.add(Attributes.MOVEMENT_SPEED, 0.25)
+			.add(Attributes.FOLLOW_RANGE, 64)
+			.add(Attributes.ARMOR, 12)
+			.add(Attributes.ARMOR_TOUGHNESS, 8)
+			.add(Attributes.KNOCKBACK_RESISTANCE, 0)
+			.add(Attributes.ATTACK_DAMAGE, 16)
+			.add(Attributes.ATTACK_KNOCKBACK, 3)
+			.add(Attributes.ATTACK_SPEED, 1)
+			.build();
 
-	private String taczGun;
-
-	public SniperTrait(String taczGun, int speedUpTicks) {
+	public SniperTrait(String taczGun) {
 		super();
-		this.add(0, (mob) -> new GunAttackGoal(mob).setBoundDistances(2, 64));
-		this.add(1, (mob) -> new SprintKeepDistanceToTargetGoal(mob, 32, 8, 1.2, speedUpTicks));
-		this.add(2, (mob) -> new NearestTargetGoal(mob, true, false, (m, e) -> true));
-		this.add(3, (mob) -> new WaterAvoidingRandomStrollGoal((PathfinderMob) mob, 1.0D));
-		this.add(4, (mob) -> new RandomLookAroundGoal(mob));
-
-		this.taczGun = taczGun;
-	}
-
-	@Override
-	public void init(BaseMob mob) {
-		super.init(mob);
-		mob.setMainHandHold(TaczGuns.getGun(taczGun));
+		this.add(new ItemHoldTrait(taczGun)); // 手持物品
+		this.add(new RandomWanderingTrait());
+		this.add(new GoalTrait()
+				.add(0, (mob) -> new GunAttackGoal(mob, 50).setBoundDistances(2.5))
+				.add(1, (mob) -> new UseItemGoal(mob, true).setBoundDistances(2))
+				.add(2, (mob) -> new KeepDistanceToTargetGoal(mob, 0, 64.0))
+				.add(3, (mob) -> new NearestTargetGoal(mob, true, true, (m, e) -> true)));
 	}
 }

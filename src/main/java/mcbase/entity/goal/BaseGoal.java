@@ -89,13 +89,17 @@ public abstract class BaseGoal extends Goal {
 	}
 
 	/**
-	 * 检查当前Goal的目标是否合法。<br>
+	 * 检查当前mob的目标实体是否合法。<br>
 	 * 
 	 * @return
 	 */
 	public final boolean checkMobTarget() {
 		LivingEntity target = this.mob.getTarget();
 		return target != null && target.isAlive();
+	}
+
+	public final void lookAt(Entity entity, float yMaxRotSpeed, float xMaxRotAngle) {
+		this.mob.getLookControl().setLookAt(entity, yMaxRotSpeed, xMaxRotAngle);
 	}
 
 	public final double distanceSqrTo(Vec3 targetPos) {

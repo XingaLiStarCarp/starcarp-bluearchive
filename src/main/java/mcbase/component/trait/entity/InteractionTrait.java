@@ -16,15 +16,28 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
  * 交互事件是双端事件，客户端与服务端会分别触发一次，如果是本地游戏则触发两次。<br>
  */
 @EventBusSubscriber(bus = Bus.FORGE)
-public abstract class InteractionTrait<_TargetEntity extends Entity & OpProvider<_TargetEntity>> extends OpTrait<_TargetEntity, PlayerInteractEvent.EntityInteract, InteractionTrait<_TargetEntity>> implements DualEndedTrait<_TargetEntity> {
+public abstract class InteractionTrait<_TargetEntity extends Entity & OpProvider> extends OpTrait<_TargetEntity, PlayerInteractEvent.EntityInteract, InteractionTrait<_TargetEntity>> implements DualEndedTrait<_TargetEntity> {
 	private final boolean isClient;
+
+	@Override
+	public final boolean isClient() {
+		return isClient;
+	}
 
 	public InteractionTrait(boolean isClient) {
 		super(PlayerInteractEvent.EntityInteract.class);
 		this.isClient = isClient;
 	}
 
-	protected boolean op(_TargetEntity target, PlayerInteractEvent.EntityInteract event) {
+	/**
+	 * 服务端执行
+	 */
+	public InteractionTrait() {
+		this(false);
+	}
+
+	@Override
+	protected boolean operate(_TargetEntity target, PlayerInteractEvent.EntityInteract event) {
 		Player player = event.getEntity();
 		// 判断端
 		if (this.validate(player)) {
@@ -34,11 +47,6 @@ public abstract class InteractionTrait<_TargetEntity extends Entity & OpProvider
 			}
 		}
 		return true;
-	}
-
-	@Override
-	public final boolean isClient() {
-		return isClient;
 	}
 
 	/**
@@ -57,10 +65,9 @@ public abstract class InteractionTrait<_TargetEntity extends Entity & OpProvider
 	 * @param event
 	 */
 	@SubscribeEvent
-	@SuppressWarnings("unchecked")
 	public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-		if (event.getTarget() instanceof OpProvider baseMob) {
-			baseMob.executeOpComponent(PlayerInteractEvent.EntityInteract.class, event);
+		if (event.getTarget() instanceof OpProvider opProvider) {
+			opProvider.executeOpComponent(PlayerInteractEvent.EntityInteract.class, event);
 		}
 	}
 }

@@ -3,7 +3,7 @@ package mcbase.component;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public interface OpProvider<_Target> {
+public interface OpProvider {
 	/**
 	 * 行为组件
 	 */
@@ -50,7 +50,7 @@ public interface OpProvider<_Target> {
 		}
 	}
 
-	public abstract HashMap<Class<?>, OpComponent<_Target, ?>> getOpComponents();
+	public abstract HashMap<Class<?>, OpComponent<?, ?>> getOpComponents();
 
 	/**
 	 * 获取实体的行为组件，若不存在则新建一个对应的行为组件。
@@ -60,8 +60,8 @@ public interface OpProvider<_Target> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public default <_Param> OpComponent<_Target, _Param> getOpComponent(Class<_Param> paramClazz) {
-		return (OpComponent<_Target, _Param>) getOpComponents().computeIfAbsent(paramClazz, (k) -> new OpComponent<>((_Target) this));
+	public default <_Param> OpComponent<?, _Param> getOpComponent(Class<_Param> paramClazz) {
+		return (OpComponent<?, _Param>) getOpComponents().computeIfAbsent(paramClazz, (k) -> new OpComponent<>(this));
 	}
 
 	/**

@@ -1,11 +1,10 @@
 package mcbase.extended.tlm.entity.maid;
 
-import java.util.List;
+import java.util.function.Supplier;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 
 import mcbase.entity.EntityRendererType;
-import mcbase.entity.data.EntityDefaultAttributes.Entry;
 import mcbase.entity.mob.BaseMob;
 import mcbase.extended.tlm.entity.maid.SyncedRenderMaid.SyncedRenderMaidEntity;
 import net.minecraft.nbt.CompoundTag;
@@ -14,6 +13,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -24,11 +24,11 @@ public class MaidMob extends BaseMob implements SyncedRenderMaidEntity {
 
 	public static final EntityRendererType<MaidModelAsset> RENDERER_TYPE = new EntityRendererType<>();
 
-	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newType(Class<T> entityClazz, float width, float height, String typeName, MobCategory category, List<Entry> attributes) {
+	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newType(Class<T> entityClazz, float width, float height, String typeName, MobCategory category, Supplier<AttributeSupplier> attributes) {
 		return BaseMob.newType(entityClazz, width, height, RENDERER_TYPE, typeName, category, attributes);
 	}
 
-	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newType(Class<T> entityClazz, float width, float height, String typeName, List<Entry> attributes) {
+	public static final <T extends BaseMob> RegistryObject<EntityType<T>> newType(Class<T> entityClazz, float width, float height, String typeName, Supplier<AttributeSupplier> attributes) {
 		return newType(entityClazz, width, height, typeName, MobCategory.MISC, attributes);
 	}
 

@@ -4,7 +4,7 @@ import mcbase.component.TraitProvider.TraitComponent;
 import mcbase.entity.EntityInteractions;
 import net.minecraft.world.entity.LivingEntity;
 
-public class StepParticlesTrait<_Entity extends LivingEntity> implements TraitComponent<_Entity> {
+public class StepParticlesTrait implements TraitComponent<LivingEntity> {
 	private double speedThreshold;
 	private int interval;
 
@@ -20,7 +20,7 @@ public class StepParticlesTrait<_Entity extends LivingEntity> implements TraitCo
 	}
 
 	@Override
-	public void tick(_Entity entity) {
+	public void tick(LivingEntity entity) {
 		if (entity.level().isClientSide()) {
 			EntityInteractions.spawnRunningGroundParticles(entity, interval, speedThreshold);// 奔跑时的粒子效果
 		}

@@ -13,13 +13,13 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
  * 实体攻击/被攻击时的特性
  */
 @EventBusSubscriber(bus = Bus.FORGE)
-public abstract class AttackTrait<_TargetEntity extends LivingEntity & OpProvider<_TargetEntity>> extends OpTrait<_TargetEntity, LivingAttackEvent, AttackTrait<_TargetEntity>> {
+public abstract class AttackTrait<_TargetEntity extends LivingEntity & OpProvider> extends OpTrait<_TargetEntity, LivingAttackEvent, AttackTrait<_TargetEntity>> {
 
 	public AttackTrait() {
 		super(LivingAttackEvent.class);
 	}
 
-	protected boolean op(_TargetEntity target, LivingAttackEvent event) {
+	protected boolean operate(_TargetEntity target, LivingAttackEvent event) {
 		LivingEntity damagee = event.getEntity();
 		if (target == damagee) {
 			this.onAttacked(event, event.getSource().getEntity(), target);
@@ -57,7 +57,6 @@ public abstract class AttackTrait<_TargetEntity extends LivingEntity & OpProvide
 	 * @param event
 	 */
 	@SubscribeEvent
-	@SuppressWarnings("unchecked")
 	public static void onLivingAttackEvent(LivingAttackEvent event) {
 		if (event.getSource().getEntity() instanceof OpProvider damager) {
 			damager.executeOpComponent(LivingAttackEvent.class, event);

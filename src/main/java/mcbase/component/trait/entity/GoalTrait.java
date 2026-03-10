@@ -1,22 +1,21 @@
 package mcbase.component.trait.entity;
 
-import java.util.ArrayList;
 import java.util.function.Function;
 
-import mcbase.component.TraitProvider.TraitComponent;
+import mcbase.component.trait.ElementTrait;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 
 /**
  * 添加常驻的Goal的特性
  */
-public class GoalTrait<_GoalHolder extends Mob> implements TraitComponent<_GoalHolder> {
-	private static class GoalEntry<_GoalHolder> {
+public class GoalTrait extends ElementTrait<Mob, GoalTrait.GoalEntry> {
+	static class GoalEntry {
 		private int priority;
 		private Goal goal;
-		private Function<_GoalHolder, Goal> goalCtor;
+		private Function<Mob, Goal> goalCtor;
 
-		public GoalEntry(int priority, Function<_GoalHolder, Goal> goalCtor) {
+		public GoalEntry(int priority, Function<Mob, Goal> goalCtor) {
 			this.priority = priority;
 			this.goalCtor = goalCtor;
 		}
@@ -25,69 +24,44 @@ public class GoalTrait<_GoalHolder extends Mob> implements TraitComponent<_GoalH
 			return priority;
 		}
 
-		public Goal goal(_GoalHolder mob) {
+		public Goal goal(Mob mob) {
 			return goal == null ? (goal = goalCtor.apply(mob)) : goal;
+		}
+
+		public Goal goal() {
+			return goal;
 		}
 	}
 
-	private _GoalHolder mob;
-	private final ArrayList<GoalEntry<_GoalHolder>> goalEntries;
-	private final ArrayList<Goal> goals;
-
-	public GoalTrait() {
-		goalEntries = new ArrayList<>();
-		goals = new ArrayList<>();
+	public GoalTrait add(int priority, Function<Mob, Goal> goalCtor) {
+		return (GoalTrait) super.add(new GoalEntry(priority, goalCtor));
 	}
 
-	/**
-	 * 添加Goal。<br>
-	 * 
-	 * @param priority Goal的优先级，priority越小优先级越高。
-	 * @param goalCtor Goal的构造函数。
-	 * @return
-	 */
-	public GoalTrait<_GoalHolder> add(int priority, Function<_GoalHolder, Goal> goalCtor) {
-		goalEntries.add(new GoalEntry<>(priority, goalCtor));
-		return this;
+	public GoalTrait add(int priority, Goal goal) {
+		return this.add(priority, goal);
 	}
 
 	@Override
-	public void init(_GoalHolder mob) {
-		goals.clear();
-		this.mob = mob;
-		for (GoalEntry<_GoalHolder> entry : goalEntries) {
-			Goal goal = entry.goal(mob);
-			goals.add(goal);
+	public void init(Mob mob, GoalEntry entry) {
+		Goal goal = entry.goal(mob);
+		if (goal != null) {
 			mob.goalSelector.addGoal(entry.priority(), goal);
 		}
 	}
 
 	@Override
-	public void uninit(_GoalHolder mob) {
-		for (Goal goal : goals) {
-			mob.goalSelector.removeGoal(goal);
+	public void uninit(Mob mob, GoalEntry entry) {
+		Goal goal = entry.goal(mob);
+		if (goal != null) {
+			mob.goalSelector.removeGoal(entry.goal(mob));
 		}
-		goals.clear();
-	}
-
-	public final _GoalHolder getMob() {
-		return mob;
 	}
 
 	public final int getPriority(int idx) {
-		return goalEntries.get(idx).priority();
+		return super.get(idx).priority();
 	}
 
 	public final Goal getGoal(int idx) {
-		return goals.get(idx);
-	}
-
-	/**
-	 * 移除指定索引的Goal
-	 * 
-	 * @param idx
-	 */
-	public final void removeGoal(int idx) {
-		mob.goalSelector.removeGoal(getGoal(idx));
+		return super.get(idx).goal();
 	}
 }

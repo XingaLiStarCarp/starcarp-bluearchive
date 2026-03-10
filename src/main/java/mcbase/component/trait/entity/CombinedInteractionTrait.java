@@ -13,7 +13,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
  * 组合动作。<br>
  * 客户端和服务端需要分开定义为两个不同的类，防止服务端运行时链接客户端类。<br>
  */
-public abstract class CombinedInteractionTrait<_TargetEntity extends Entity & OpProvider<_TargetEntity>> extends InteractionTrait<_TargetEntity> {
+public abstract class CombinedInteractionTrait<_TargetEntity extends Entity & OpProvider> extends InteractionTrait<_TargetEntity> {
 
 	private CombinedTask consumeItemsTask;
 
@@ -37,7 +37,7 @@ public abstract class CombinedInteractionTrait<_TargetEntity extends Entity & Op
 	}
 
 	@FunctionalInterface
-	public static interface CombinedInteractionOp<_TargetEntity extends Entity & OpProvider<_TargetEntity>> {
+	public static interface CombinedInteractionOp<_TargetEntity extends Entity & OpProvider> {
 		public abstract boolean interact(PlayerInteractEvent.EntityInteract event, Player player, _TargetEntity target, InteractionHand hand);
 	}
 
@@ -48,14 +48,14 @@ public abstract class CombinedInteractionTrait<_TargetEntity extends Entity & Op
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static final <_TargetEntity extends Entity & OpProvider<_TargetEntity>> Function<Object[], Boolean> combineTaskInteraction(final CombinedInteractionOp<_TargetEntity> op) {
+	public static final <_TargetEntity extends Entity & OpProvider> Function<Object[], Boolean> combineTaskInteraction(final CombinedInteractionOp<_TargetEntity> op) {
 		return (Object... args) -> {
 			return op.interact((PlayerInteractEvent.EntityInteract) args[0], (Player) args[1], (_TargetEntity) args[2], (InteractionHand) args[3]);
 		};
 	}
 
 	@SuppressWarnings("unchecked")
-	public static final <_TargetEntity extends Entity & OpProvider<_TargetEntity>> Function<Object[], Boolean>[] combineTaskInteractions(CombinedInteractionOp<_TargetEntity>... ops) {
+	public static final <_TargetEntity extends Entity & OpProvider> Function<Object[], Boolean>[] combineTaskInteractions(CombinedInteractionOp<_TargetEntity>... ops) {
 		Function<Object[], Boolean>[] convertedOps = new Function[ops.length];
 		for (int i = 0; i < ops.length; ++i) {
 			convertedOps[i] = combineTaskInteraction(ops[i]);
@@ -63,19 +63,22 @@ public abstract class CombinedInteractionTrait<_TargetEntity extends Entity & Op
 		return convertedOps;
 	}
 
-	@SuppressWarnings("unchecked")
-	public CombinedInteractionTrait(boolean isClient, CombinedInteractionOp<_TargetEntity>... ops) {
+	public CombinedInteractionTrait(boolean isClient) {
 		super(isClient);
+	}
+
+	public CombinedInteractionTrait() {
+		this(false);
+	}
+
+	@SuppressWarnings("unchecked")
+	protected CombinedInteractionTrait<_TargetEntity> setOp(CombinedInteractionOp<_TargetEntity>... ops) {
 		this.consumeItemsTask = new CombinedTask(
 				(Object... args) -> this.onSingleSuccess((PlayerInteractEvent.EntityInteract) args[0], (Player) args[1], (_TargetEntity) args[2], (InteractionHand) args[3]),
 				(Object... args) -> this.onAnyFailed((PlayerInteractEvent.EntityInteract) args[0], (Player) args[1], (_TargetEntity) args[2], (InteractionHand) args[3]),
 				(Object... args) -> this.onSuccess((PlayerInteractEvent.EntityInteract) args[0], (Player) args[1], (_TargetEntity) args[2], (InteractionHand) args[3]),
 				combineTaskInteractions(ops));
-	}
-
-	@SuppressWarnings("unchecked")
-	public CombinedInteractionTrait(CombinedInteractionOp<_TargetEntity>... ops) {
-		this(false, ops);
+		return this;
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package mcbase.component;
 
 import java.util.ArrayList;
 
-public interface TraitProvider<_TraitTarget> {
+public interface TraitProvider {
 	/**
 	 * 特征组件，所有种类的行为组件都必须实现此接口
 	 */
@@ -20,28 +20,28 @@ public interface TraitProvider<_TraitTarget> {
 		}
 	}
 
-	public abstract ArrayList<TraitComponent<_TraitTarget>> getTraits();
+	public abstract ArrayList<TraitComponent<?>> getTraits();
 
-	@SuppressWarnings("unchecked")
-	public default void addTrait(TraitComponent<_TraitTarget> trait) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public default void addTrait(TraitComponent<?> trait) {
 		getTraits().add(trait);
-		trait.init((_TraitTarget) this);
+		((TraitComponent) trait).init(this);
 	}
 
-	@SuppressWarnings("unchecked")
-	public default void removeTrait(TraitComponent<_TraitTarget> trait) {
-		trait.uninit((_TraitTarget) this);
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public default void removeTrait(TraitComponent<?> trait) {
+		((TraitComponent) trait).uninit(this);
 		getTraits().remove(trait);
 	}
 
 	/**
 	 * 子类必须每tick调用此方法更新
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public default void tickTraits() {
-		ArrayList<TraitComponent<_TraitTarget>> traits = this.getTraits();
-		for (TraitComponent<_TraitTarget> trait : traits) {
-			trait.tick((_TraitTarget) this);
+		ArrayList<TraitComponent<?>> traits = this.getTraits();
+		for (TraitComponent<?> trait : traits) {
+			((TraitComponent) trait).tick(this);
 		}
 	}
 }

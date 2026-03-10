@@ -1,56 +1,52 @@
 package scba.entity.npc.warfare.trait;
 
-import java.util.List;
+import java.util.function.Supplier;
 
+import mcbase.component.trait.MultiTrait;
 import mcbase.component.trait.entity.GoalTrait;
-import mcbase.entity.data.EntityDefaultAttributes.Entry;
-import mcbase.entity.goal.MeleeAttackGoal;
-import mcbase.entity.goal.NearestTargetGoal;
-import mcbase.entity.goal.SprintKeepDistanceToTargetGoal;
-import mcbase.entity.goal.UseItemGoal;
-import mcbase.entity.mob.BaseMob;
-import mcbase.registry.Registers;
-import net.minecraft.world.entity.PathfinderMob;
+import mcbase.component.trait.entity.ItemHoldTrait;
+import mcbase.component.trait.entity.RandomWanderingTrait;
+import mcbase.component.trait.entity.StepParticlesTrait;
+import mcbase.entity.goal.action.MeleeAttackGoal;
+import mcbase.entity.goal.action.UseItemGoal;
+import mcbase.entity.goal.navigation.SprintKeepDistanceToTargetGoal;
+import mcbase.entity.goal.target.NearestTargetGoal;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 
-public class WardenTrait extends GoalTrait<BaseMob> {
-	public static final List<Entry> ATTRIBUTES = List.of(
-			Entry.of(Attributes.MAX_HEALTH, 20),
-			Entry.of(Attributes.MOVEMENT_SPEED, 0.2),
-			Entry.of(Attributes.FOLLOW_RANGE, 64),
-			Entry.of(Attributes.ARMOR, 20),
-			Entry.of(Attributes.ARMOR_TOUGHNESS, 8),
-			Entry.of(Attributes.KNOCKBACK_RESISTANCE, 0.8),
-			Entry.of(Attributes.ATTACK_DAMAGE, 10),
-			Entry.of(Attributes.ATTACK_KNOCKBACK, 1),
-			Entry.of(Attributes.ATTACK_SPEED, 1.5));
+/**
+ * 典狱长，冲刺近战攻击
+ */
+public class WardenTrait extends MultiTrait {
+	public static final Supplier<AttributeSupplier> ATTRIBUTES = () -> Mob.createMobAttributes()
+			.add(Attributes.MAX_HEALTH, 20)
+			.add(Attributes.MOVEMENT_SPEED, 0.2)
+			.add(Attributes.FOLLOW_RANGE, 32)
+			.add(Attributes.ARMOR, 20)
+			.add(Attributes.ARMOR_TOUGHNESS, 8)
+			.add(Attributes.KNOCKBACK_RESISTANCE, 0.8)
+			.add(Attributes.ATTACK_DAMAGE, 8)
+			.add(Attributes.ATTACK_KNOCKBACK, 1)
+			.add(Attributes.ATTACK_SPEED, 2)
+			.build();
 
-	protected String mainHandItem;
-	protected String offhandItem;
+	public static final String MAIN_HAND_ITEM = "superbwarfare:t_baton";
+	public static final String OFFHAND_HAND_ITEM = "minecraft:shield";
 
 	public WardenTrait(String mainHandItem, String offhandItem, int speedUpTicks) {
 		super();
-		this.add(0, (mob) -> new MeleeAttackGoal(mob).setBoundDistances(1.5));
-		this.add(1, (mob) -> new UseItemGoal(mob, true).setBoundDistances(2));// 盾牌被攻击打断时立即重新开盾
-		this.add(2, (mob) -> new SprintKeepDistanceToTargetGoal(mob, 0, 0.5, 3.0, speedUpTicks));
-		this.add(3, (mob) -> new NearestTargetGoal(mob, true, true, (m, e) -> true));
-		this.add(4, (mob) -> new WaterAvoidingRandomStrollGoal((PathfinderMob) mob, 1.0D));
-		this.add(5, (mob) -> new RandomLookAroundGoal(mob));
-
-		this.mainHandItem = mainHandItem;
-		this.offhandItem = offhandItem;
+		this.add(new ItemHoldTrait(mainHandItem, offhandItem)); // 手持物品
+		this.add(new RandomWanderingTrait());
+		this.add(new StepParticlesTrait(2.0));// 地面跑动有方块粒子特效
+		this.add(new GoalTrait()
+				.add(0, (mob) -> new MeleeAttackGoal(mob, 2, 15).setBoundDistances(2.5))
+				.add(1, (mob) -> new UseItemGoal(mob, true).setBoundDistances(2))
+				.add(2, (mob) -> new SprintKeepDistanceToTargetGoal(mob, 0, 1.5, 3.0, speedUpTicks))
+				.add(3, (mob) -> new NearestTargetGoal(mob, true, true, (m, e) -> true)));
 	}
 
-	public WardenTrait(String mainHandItem, int speedUpTicks) {
-		this(mainHandItem, "minecraft:shield", speedUpTicks);
-	}
-
-	@Override
-	public void init(BaseMob mob) {
-		super.init(mob);
-		mob.setMainHandHold(Registers.item(mainHandItem));
-		mob.setOffHandHold(Registers.item(offhandItem));
+	public WardenTrait(int speedUpTicks) {
+		this(MAIN_HAND_ITEM, OFFHAND_HAND_ITEM, speedUpTicks);
 	}
 }

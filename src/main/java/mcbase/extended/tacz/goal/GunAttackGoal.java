@@ -1,6 +1,6 @@
 package mcbase.extended.tacz.goal;
 
-import mcbase.entity.goal.AttackGoal;
+import mcbase.entity.goal.action.AttackGoal;
 import mcbase.extended.tacz.TaczGunOperator;
 import net.minecraft.world.entity.Mob;
 
@@ -13,13 +13,13 @@ public class GunAttackGoal extends AttackGoal {
 		this.setBoundDistances(4, 32);
 	}
 
+	@Deprecated
 	public GunAttackGoal(Mob mob) {
-		this(mob, ENTITY_ATTRIBUTE_ATTACK_INTERVAL);
+		this(mob, ATTRIBUTE_ATTACK_SPEED);
 	}
 
 	@Override
 	public void attack(double currentDistance, int currentBoundLevel) {
-		System.err.println("GunAttackGoal currentDistance,   currentBoundLevel  " + currentDistance + "      " + currentBoundLevel);
 		switch (currentBoundLevel) {
 		case 0:
 			gunOperator.craw(false);

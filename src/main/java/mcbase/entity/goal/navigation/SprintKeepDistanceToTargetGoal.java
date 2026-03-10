@@ -1,4 +1,4 @@
-package mcbase.entity.goal;
+package mcbase.entity.goal.navigation;
 
 import net.minecraft.world.entity.Mob;
 

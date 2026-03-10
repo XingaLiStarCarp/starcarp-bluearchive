@@ -15,6 +15,6 @@ public class HumanSniper extends GeneralHumanoidMob {
 
 	public HumanSniper(EntityType<BaseMob> entityType, EntityRendererType<GeneralHumanoidModelInfo> rendererType, Level level) {
 		super(entityType, rendererType, level);
-		this.addTrait(new SniperTrait("tacz:m95", 20));
+		this.addTrait(new SniperTrait("tacz:m95"));
 	}
 }

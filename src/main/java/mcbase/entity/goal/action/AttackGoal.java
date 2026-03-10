@@ -1,18 +1,17 @@
-package mcbase.entity.goal;
+package mcbase.entity.goal.action;
 
 import java.util.EnumSet;
 
 import mcbase.TimeUtils;
 import mcbase.entity.EntityInteractions;
+import mcbase.entity.goal.DistanceBoundGoal;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 
 public abstract class AttackGoal extends DistanceBoundGoal {
 	protected int attackInterval;
-	protected AttributeInstance attackSpeedAttribute;
 	/**
 	 * 攻击时实体是否面朝目标
 	 */
@@ -27,32 +26,45 @@ public abstract class AttackGoal extends DistanceBoundGoal {
 	 */
 	protected float xMaxRotAngle = 30.0f;
 
-	public static final int ENTITY_ATTRIBUTE_ATTACK_INTERVAL = -1;
+	/**
+	 * 使用实体的ATTACK_SPEED属性计算攻击间隔<br>
+	 * 尽管设置了该值，但运行时始终为0，请勿使用。<br>
+	 */
+	@Deprecated
+	public static final int ATTRIBUTE_ATTACK_SPEED = -1;
 
 	public AttackGoal(Mob mob, int attackInterval) {
 		super(mob);
 		this.attackInterval = attackInterval;
-		this.attackSpeedAttribute = mob.getAttribute(Attributes.ATTACK_SPEED);
 		this.setFlags(EnumSet.of(Goal.Flag.LOOK));
 	}
 
+	@Deprecated
 	public AttackGoal(Mob mob) {
-		this(mob, ENTITY_ATTRIBUTE_ATTACK_INTERVAL);
+		this(mob, ATTRIBUTE_ATTACK_SPEED);
+	}
+
+	protected double getAttackSpeed() {
+		return this.mob.getAttributeValue(Attributes.ATTACK_SPEED);
+	}
+
+	@Override
+	public boolean canUse() {
+		return this.checkMobTarget();
 	}
 
 	@Override
 	public void update(double currentDistance, int currentBoundLevel) {
-		System.err.println("AttackGoal currentDistance,   currentBoundLevel  " + currentDistance + "      " + currentBoundLevel);
 		LivingEntity target = mob.getTarget();
-		this.mob.getLookControl().setLookAt(target, yMaxRotSpeed, xMaxRotAngle);// 攻击时朝向目标
+		this.lookAt(target, yMaxRotSpeed, xMaxRotAngle);// 攻击时朝向目标
 		// 判断是否面对目标
-		if (!mustFace || (mustFace && EntityInteractions.isEntityFacing(this.mob, target.getEyePosition(), faceToleranceAngle))) {
+		if (mustFace ? EntityInteractions.isEntityFacing(this.mob, target.getEyePosition(), faceToleranceAngle) : true) {
 			if (this.attackInterval > 0) {
 				// 手动设置了attackInterval
 				this.attack(currentDistance, currentBoundLevel);
 			} else {
 				// 使用实体的的attack speed
-				int attributeAttackInterval = (int) (TimeUtils.TICKS_PER_SECOND / attackSpeedAttribute.getBaseValue());
+				int attributeAttackInterval = (int) (TimeUtils.TICKS_PER_SECOND / this.getAttackSpeed());
 				if (this.getTicks() % attributeAttackInterval == 0) {
 					this.attack(currentDistance, currentBoundLevel);
 				}

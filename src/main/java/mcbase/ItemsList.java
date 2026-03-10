@@ -26,6 +26,10 @@ public class ItemsList {
 		return new ItemStack(type, count);
 	}
 
+	public int size() {
+		return list.size();
+	}
+
 	/**
 	 * 为物品清单新增
 	 * 
@@ -79,6 +83,10 @@ public class ItemsList {
 		for (ItemStack curretnItem : list) {
 			inv.add(curretnItem);
 		}
+	}
+
+	public ItemStack getItem(int idx) {
+		return list.get(idx);
 	}
 
 	public int totalCount() {

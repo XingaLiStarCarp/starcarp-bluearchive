@@ -10,6 +10,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class MobGoalUtils {
+	public static final int PRIORITY_LOWEST = Integer.MAX_VALUE;
+	public static final int PRIORITY_HIGHEST = Integer.MIN_VALUE;
+
 	/**
 	 * 当前位置的脚下方块是否是可站立的。
 	 * 

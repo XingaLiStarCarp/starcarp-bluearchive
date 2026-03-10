@@ -1,4 +1,4 @@
-package mcbase.entity.goal;
+package mcbase.entity.goal.navigation;
 
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
@@ -25,8 +25,7 @@ public abstract class KeepDistanceGoal extends NavigationGoal {
 	public KeepDistanceGoal(Mob mob, double keepDistanceMin, double keepDistanceMax, double speedModifier, boolean interrupt, int updateTicks) {
 		super(mob, interrupt, updateTicks);
 		this.speedModifier = speedModifier;
-		this.keepDistanceMin = keepDistanceMin;
-		this.keepDistanceMax = keepDistanceMax;
+		this.setKeepDistance(keepDistanceMin, keepDistanceMax);
 	}
 
 	public KeepDistanceGoal(Mob mob, double keepDistanceMin, double keepDistanceMax) {
@@ -49,7 +48,7 @@ public abstract class KeepDistanceGoal extends NavigationGoal {
 		return maxDistanceSqr;
 	}
 
-	public void setKeepDistanceMin(double keepDistanceMin, double keepDistanceMax) {
+	public void setKeepDistance(double keepDistanceMin, double keepDistanceMax) {
 		this.keepDistanceMin = keepDistanceMin;
 		this.keepDistanceMax = keepDistanceMax;
 		this.minDistanceSqr = keepDistanceMin * keepDistanceMin;
@@ -69,19 +68,24 @@ public abstract class KeepDistanceGoal extends NavigationGoal {
 		return isInRange(this.targetPos);// 仅当距离不符合时继续
 	}
 
+	/**
+	 * 实体移动时的目标位置，可重写
+	 * 
+	 * @param targetPos
+	 * @param direction
+	 * @param distance
+	 * @return
+	 */
 	protected double targetDistance(Vec3 targetPos, Vec3 direction, double distance) {
-		if (distance < keepDistanceMin)
-			return keepDistanceMin;
-		else if (distance > keepDistanceMax)
-			return keepDistanceMax;
-		else
-			return distance;
+		return (keepDistanceMin + keepDistanceMax) / 2.0;
 	}
 
 	@Override
 	protected void updateMovement(Vec3 targetPos, Vec3 direction, double distance) {
-		// 距离过远，实体要靠近。距离过近，实体要远离
-		Vec3 moveToPos = targetPos.add(direction.scale(this.targetDistance(targetPos, direction, distance)));
-		this.navigation.moveTo(moveToPos.x, moveToPos.y, moveToPos.z, this.speedModifier);
+		// 距离过远，实体要靠近。距离过近，实体要远离，距离满足条件则不动
+		if (distance < keepDistanceMin || distance > keepDistanceMax) {
+			Vec3 moveToPos = targetPos.add(direction.scale(this.targetDistance(targetPos, direction, distance)));
+			this.moveTo(moveToPos.x, moveToPos.y, moveToPos.z, this.speedModifier);
+		}
 	}
 }
